@@ -90,6 +90,9 @@ compute_fw_parts()
 			if [ "${CONFIG_FS_ROMFS}" == "y" ]; then
 				rom=1
 			fi
+			if [ "${CONFIG_DEBUG_DISPLAY_SYMBOL}" == "y" ]; then
+				symtab=1
+			fi
 			;;
 		BL1|bl1)
 			bl1=1
@@ -119,7 +122,7 @@ compute_fw_parts()
 	esac
 
 	parts=
-	for var in bl1 bl2 sssfw wlanfw os rom ota; do
+	for var in bl1 bl2 sssfw wlanfw os rom ota symtab; do
 		eval value='${'${var}:-}
 		if [ "x${value:-}" == x1 ]; then
 			parts+=" ${var}"
@@ -161,6 +164,10 @@ compute_ocd_commands()
 			rom)
 				ensure_file ${OUTPUT_BINARY_PATH}/romfs.img
 				commands+="flash_write ${part} ${OUTPUT_BINARY_PATH}/romfs.img ${VERIFY}; "
+				;;
+			symtab)
+				ensure_file ${OUTPUT_BINARY_PATH}/Symtab.bin
+				commands+="flash_write ${part} ${OUTPUT_BINARY_PATH}/Symtab.bin ${VERIFY}; "
 				;;
 			*)
 				echo "Unrecognized firmware part ${part}"
@@ -247,7 +254,7 @@ while test $# -gt 0; do
 		--verify)
 			VERIFY=verify
 			;;
-		ALL|OS|ROMFS|BL1|BL2|SSSFW|WLANFW|OTA|all|os|romfs|bl1|bl2|sssfw|wlanfw|ota)
+		ALL|OS|ROMFS|BL1|BL2|SSSFW|WLANFW|OTA|all|os|romfs|bl1|bl2|sssfw|wlanfw|ota|symtab)
 			download $1
 			;;
 		ERASE_*)

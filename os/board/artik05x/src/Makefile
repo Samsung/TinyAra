@@ -76,6 +76,10 @@ ifeq ($(CONFIG_BOARD_CRASHDUMP),y)
 CSRCS += artik05x_crashdump.c
 endif
 
+ifeq ($(CONFIG_DEBUG_DISPLAY_SYMBOL),y)
+CSRCS += artik05x_symtab.c
+endif
+
 ifeq ($(CONFIG_MTD_PROGMEM),y)
 CSRCS += artik05x_progmem.c
 endif

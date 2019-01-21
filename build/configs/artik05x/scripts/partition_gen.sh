@@ -121,6 +121,9 @@ do
 		pname_text="ROM FS"
 		ro=0
 		romfs_part_exist=1
+	elif [ "$pname" == "symtab" ]; then
+		pname_text="Symbol Table"
+		ro=0
 	elif [ "$pname" == "nvram" ]; then
 		pname_text="WiFi NVRAM"
 		ro=1

@@ -550,6 +550,10 @@ void os_start(void)
 
 	lib_initialize();
 
+#ifdef CONFIG_DEBUG_DISPLAY_SYMBOL
+	up_symtab_init();
+#endif
+
 	/* IDLE Group Initialization **********************************************/
 #ifdef HAVE_TASK_GROUP
 	/* Allocate the IDLE group */

@@ -81,9 +81,6 @@
 /****************************************************************************
  * Global Variables
  ****************************************************************************/
-#ifdef CONFIG_DEBUG_DISPLAY_SYMBOL
-extern bool abort_mode;
-#endif
 
 /****************************************************************************
  * Private Variables
@@ -125,15 +122,7 @@ int sem_wait(FAR sem_t *sem)
 	irqstate_t saved_state;
 	int ret = ERROR;
 	/* This API should not be called from interrupt handlers */
-#ifdef CONFIG_DEBUG_DISPLAY_SYMBOL
-	DEBUGASSERT((sem != NULL && up_interrupt_context() == false) || abort_mode);
-
-	if (abort_mode && up_interrupt_context() == true) {
-		return OK;
-	}
-#else
 	DEBUGASSERT(sem != NULL && up_interrupt_context() == false);
-#endif
 
 	/* The following operations must be performed with interrupts
 	 * disabled because sem_post() may be called from an interrupt

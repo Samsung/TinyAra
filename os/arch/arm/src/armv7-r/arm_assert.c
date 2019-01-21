@@ -96,8 +96,7 @@
 #endif
 #ifdef CONFIG_DEBUG_DISPLAY_SYMBOL
 #include <stdio.h>
-bool abort_mode = false;
-static bool recursive_abort = false;
+#include <arch/board/symtab.h>
 #endif
 
 /****************************************************************************
@@ -117,6 +116,10 @@ bool g_upassert = false;
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+#ifdef CONFIG_DEBUG_DISPLAY_SYMBOL
+static int symbolnum;
+static bool symtab_init = false;
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -203,116 +206,92 @@ static int is_text_address(unsigned long programCounter)
 
 #define MEM_READ(x) (*(uint32_t volatile*)(x))
 
+#ifdef CONFIG_DEBUG_DISPLAY_SYMBOL
+void up_symtab_init(void)
+{
+	if (up_symtab_flashdrv_init() == OK) {
+		symtab_init = true;
+	}
+}
+
+static unsigned long getaddr(int index)
+{
+	unsigned long addr;
+	/* (index-1) corresponds to start of index's byte address */
+
+	up_symtab_flashdrv_read(&addr, (index - 1) * 4 + 4, 4);
+	return addr;
+}
+
+static void getname(int ind, char *buffer, size_t buflen)
+{
+	unsigned long sym_offlen;
+	unsigned long nextsym_offlen;
+	unsigned long symlen;
+
+	memset(buffer, '\0', buflen);
+	/* Reading offset symbol length of the symbol */
+
+	up_symtab_flashdrv_read(&sym_offlen, (symbolnum * 4) + ((ind - 1) * 4) + 4, 4);
+	/* Reading offset symbol length of next symbol */
+
+	up_symtab_flashdrv_read(&nextsym_offlen, (symbolnum * 4) + (ind * 4) + 4, 4);
+	/* Calculating the symbol length based on above two offset lengths */
+
+	symlen = nextsym_offlen - sym_offlen;
+	/* Reading the symbol name */
+
+	up_symtab_flashdrv_read(buffer, symbolnum * 8 + sym_offlen + 4, symlen);
+}
+
+static void getsymbolnum(void)
+{
+	up_symtab_flashdrv_read(&symbolnum, 0, 4);
+}
+
 /****************************************************************************
  * Name: get_symbol
- * Below API works if there is existance of System.map file in rom fs
+ * Below API only works if symtab flash driver is initialized
  ****************************************************************************/
-#ifdef CONFIG_DEBUG_DISPLAY_SYMBOL
-int get_symbol(unsigned long search_addr, char *buffer, size_t buflen)
+static int get_symbol(unsigned long search_addr, char *buffer, size_t buflen)
 {
-	FILE *pFile;
-	int total;
-	unsigned long sym_offset;
-	unsigned long total_size;
-	unsigned long addr;
-	unsigned long next_addr;
-	int first = 0;
+	int first;
 	int last;
 	int mid;
-	char line[128] = { '\0' };
-	char data[6][128] = { {'\0', '\0'} };
-	char c;
-	int word;
-	int ch_in_word;
-	int read_line;
-	int ch_in_line;
+	unsigned long addr;
+	unsigned long addr_next;
 
-	if (recursive_abort) {
-		/* If there is a crash in file system, below operation would
-		   lead to recursive abort, as this api will be called inside
-		   abort handler and tries to access the file system api.
-		   To avoid recursive abort, just return from here if we are
-		   already in abort mode.
-		 */
+	if (buffer == NULL) {
+		lldbg("Invalid buffer input \n");
 		return -1;
 	}
 
-	pFile = fopen("/rom/System.map", "r");
+	getsymbolnum();
+	first = 1;
+	last = symbolnum;
 
-	/* Check if file exists */
-	if (pFile == NULL) {
-		lldbg("Could not open file: /rom/System.map\n");
-		return -1;
-	}
-	// obtain file size:
-	fseek(pFile, 0, SEEK_END);
-	last = ftell(pFile);
-
-	rewind(pFile);
-	mid = (first + last) / 2;
 	while (first <= last) {
-		fseek(pFile, mid, SEEK_SET);
 
-		/* If the file pointer is in the mid of the line, make sure
-		 * it's been properly moved to start of next line
-		 */
-		for (c = getc(pFile); c != '\n'; c = getc(pFile)) {
-			if (c == EOF) {
-				lldbg("Reached end of file and couldn't find symbol\n");
-				fclose(pFile);
-				return -1;
-			}
-		}
+		mid = (first + last) / 2;
+		addr = getaddr(mid);
+		addr_next = getaddr(mid + 1);
+		/* Checking whether given address lies in the range */
 
-		word = 0;
-		// Read 2 lines and Split the string as words
-		for (read_line = 0; read_line < 2; read_line++) {
-			fgets(line, 128, pFile);
-			ch_in_line = 0;
-			ch_in_word = 0;
-			while (line[ch_in_line] != '\0') {
-				if (line[ch_in_line] != ' ') {
-					data[word][ch_in_word++] = line[ch_in_line];
-				} else {
-					data[word][ch_in_word] = '\0';
-					word++;
-					ch_in_word = 0;
-				}
-				ch_in_line++;
-				if (line[ch_in_line] == '\0') {
-					data[word][ch_in_word] = '\0';
-					word++;
-					ch_in_word = 0;
-				}
-			}
-		}
-		/* Convert the string data to hexadecimal */
-		addr = strtoul(data[0], NULL, 16);
-		next_addr = strtoul(data[3], NULL, 16);
-		if (search_addr >= addr && search_addr < next_addr) {
-			total = snprintf(buffer, buflen, "%s", data[2]);
-			sym_offset = search_addr - addr;
-			total_size = next_addr - addr;
-			snprintf(&buffer[total - 1], buflen - total, "+0x%lx/0x%lx", sym_offset, total_size);
-			break;
-		}
-		if (search_addr < addr) {
+		if (addr > search_addr) {
 			last = mid - 1;
+		} else if (addr <= search_addr && search_addr < addr_next) {
+			/* If present, the symbol name is obtained */
+
+			getname(mid, buffer, buflen);
+			snprintf(&buffer[strlen(buffer)], buflen - strlen(buffer), "+0x%lx/0x%lx", search_addr - addr, addr_next-addr);
+
+			return OK;
 		} else {
 			first = mid + 1;
 		}
-
-		mid = (first + last) / 2;
 	}
-	if (first > last) {
-		lldbg("symbol is not found in system map\n");
-		buffer = "";
-	}
-
-	/* Close the file */
-	fclose(pFile);
-
-	return 0;
+	lldbg("Symbol not found in System.map\n");
+	return -1;
 }
 #endif
 
@@ -400,9 +379,13 @@ static void unwind_backtrace_with_fp(arm_regs_t *regs, struct tcb_s *task)
 		if (unwind_frame_with_fp(&stack_frame, ustacksize) >= 0) {
 			/* Print the call stack address */
 #ifdef CONFIG_DEBUG_DISPLAY_SYMBOL
-			char buffer[128];
-			if (get_symbol(current_addr, buffer, sizeof(buffer)) == 0) {
-				lldbg("[<0x%p>] %s\n", (void *)current_addr, buffer);
+			/* Only if symtab flash driver is initialized, get symbol is called */
+
+			if (symtab_init) {
+				char buffer[128];
+				if (get_symbol(current_addr, buffer, sizeof(buffer)) == 0) {
+					lldbg("[<0x%p>] %s\n", (void *)current_addr, buffer);
+				}
 			} else
 #endif
 			{
@@ -946,16 +929,6 @@ static void _up_assert(int errorcode)
 void up_assert(const uint8_t *filename, int lineno)
 {
 	board_autoled_on(LED_ASSERTION);
-#ifdef CONFIG_DEBUG_DISPLAY_SYMBOL
-	/* First time, when code reaches here abort_mode will be false and
-	   for next iteration (recursive abort case), abort_mode is already
-	   set to true and thus we can assume that we are in recursive abort
-	   mode and thus set the flag accordingly */
-	if (abort_mode) {
-		recursive_abort = true;
-	}
-	abort_mode = true;
-#endif
 
 #if CONFIG_TASK_NAME_SIZE > 0
 	lldbg("Assertion failed at file:%s line: %d task: %s\n", filename, lineno, this_task()->name);

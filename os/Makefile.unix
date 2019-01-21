@@ -679,3 +679,10 @@ romfs:
 ifeq ($(CONFIG_FS_ROMFS),y)
 	$(Q) ../tools/fs/mkromfsimg.sh
 endif
+
+#Symbol table formatter
+#
+# This script executes the symbol table formatter application
+ifeq ($(CONFIG_DEBUG_DISPLAY_SYMBOL),y)
+	./tools/symtab_formatter.sh
+endif
