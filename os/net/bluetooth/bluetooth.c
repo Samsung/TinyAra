@@ -1347,6 +1347,9 @@ static int set_le_scan_enable(uint8_t enable)
 	FAR struct bt_hci_cp_le_set_scan_enable_s *cp;
 	FAR struct bt_buf_s *buf;
 	int err;
+
+	nvdbg("amit + ");
+
 	buf = bt_hci_cmd_create(BT_HCI_OP_LE_SET_SCAN_ENABLE, sizeof(*cp));
 	if (!buf) {
 		return -ENOBUFS;
@@ -1379,6 +1382,9 @@ static int start_le_scan(uint8_t scan_type, uint16_t interval, uint16_t window)
 	FAR struct bt_hci_cp_le_set_scan_params_s *set_param;
 	FAR struct bt_buf_s *buf;
 	int err;
+
+	nvdbg("amit + ");
+
 	buf = bt_hci_cmd_create(BT_HCI_OP_LE_SET_SCAN_PARAMS, sizeof(*set_param));
 	if (buf == NULL) {
 		ndbg("ERROR:  Failed to create buffer\n");
@@ -1558,6 +1564,8 @@ void ble_adv_report(FAR struct bt_buf_s *buf)
 int bt_le_scan_start(const struct bt_le_scan_param *param, bt_le_scan_cb_t cb)
 {
 	int err;
+	nvdbg("amit + ");
+
 	if (!bt_atomic_testbit(g_btdev.flags, BT_DEV_READY)) {
 		return -EAGAIN;
 	}
@@ -1585,6 +1593,8 @@ int bt_le_scan_start(const struct bt_le_scan_param *param, bt_le_scan_cb_t cb)
 	} else {
 		bt_atomic_clrbit(g_btdev.flags, BT_DEV_SCAN_FILTER_DUP);
 	}
+
+	nvdbg("amit1 + ");
 
 	err = start_le_scan(param->type, param->interval, param->window);
 	if (err) {

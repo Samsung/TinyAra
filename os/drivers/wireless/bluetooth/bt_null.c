@@ -96,6 +96,19 @@ static const bt_addr_t g_bt_addr = {
 
 static uint8_t local_name[HCI_MAX_NAME_LENGTH];
 
+/* scan parameter */
+FAR struct bt_hci_cp_le_set_scan_params_s g_scan_parms;
+FAR struct bt_hci_cp_le_set_scan_enable_s g_scan_enable;
+
+struct bt_hci_rp_scan_enable_status_s {
+	uint8_t status;
+};
+
+uint8_t g_ad_data[31] = { 0x02, 0x01, 0x1a, 0x1b, 0xff, 0x75, 0x00, 0x42, 0x04, 0x01, 0x20, 0x6f,
+						  0x19, 0x0f, 0x00, 0x02, 0x01, 0x37, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
+						  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+						};
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -242,6 +255,143 @@ static void btnull_process_write_local_name_req(FAR struct bt_buf_s *buf)
 	}
 }
 
+static void btnull_process_set_scan_params_req(FAR struct bt_buf_s *buf)
+{
+	FAR struct bt_hci_cmd_hdr_s *hdr;
+	FAR struct bt_hci_cp_le_set_scan_params_s *set_param;
+
+	nvdbg("BT_HCI_OP_LE_SET_SCAN_PARAMS request is received");
+
+	if (buf->type == BT_CMD) {
+		hdr = (FAR void *)buf->data;
+		uint16_t opcode = hdr->opcode;
+
+		nvdbg("CMD: %04x\n", opcode);
+
+		set_param = bt_buf_consume(buf, sizeof(struct bt_hci_cmd_hdr_s));
+
+		memset(&g_scan_parms, 0, sizeof(g_scan_parms));
+		g_scan_parms.scan_type = set_param->scan_type;
+		g_scan_parms.interval = set_param->interval;
+		g_scan_parms.window = set_param->window;
+		g_scan_parms.addr_type = set_param->addr_type;
+		g_scan_parms.filter_policy = set_param->filter_policy;
+
+		nvdbg("scan_type is: [%d]", g_scan_parms.scan_type);
+	}
+}
+
+static void btnull_process_scan_enable_req(FAR struct bt_buf_s *buf)
+{
+	FAR struct bt_hci_cmd_hdr_s *hdr;
+	FAR struct bt_hci_cp_le_set_scan_enable_s *scan_enable;
+
+	nvdbg("BT_HCI_OP_LE_SET_SCAN_ENABLE request is received");
+
+	if (buf->type == BT_CMD) {
+		hdr = (FAR void *)buf->data;
+		uint16_t opcode = hdr->opcode;
+
+		nvdbg("CMD: %04x\n", opcode);
+
+		scan_enable = bt_buf_consume(buf, sizeof(struct bt_hci_cmd_hdr_s));
+		g_scan_enable.enable = scan_enable->enable;
+		g_scan_enable.filter_dup = scan_enable->filter_dup;
+
+		nvdbg("scan enable: [%d]", g_scan_enable.enable);
+	}
+}
+
+static void btnull_format_scan_status_rsp(FAR struct bt_buf_s *buf, uint16_t opcode)
+{
+	struct bt_hci_rp_scan_enable_status_s scan_status;
+	FAR uint8_t *data = buf->frame->io_data;
+	int ndx;
+	int len;
+
+	nvdbg("scan_status_rsp");
+
+	btnull_format_cmdcomplete(buf, opcode);
+
+	len = buf->len + sizeof(struct bt_hci_rp_scan_enable_status_s);
+	ndx = buf->len;
+
+	scan_status.status = 0;
+	memcpy(&data[ndx], &scan_status, sizeof(struct bt_hci_rp_scan_enable_status_s));
+	ndx += sizeof(struct bt_hci_rp_scan_enable_status_s);
+
+	buf->frame->io_len = len;
+	buf->len = len;
+}
+
+static void btnull_format_le_meta_event(FAR struct bt_buf_s *buf, uint16_t opcode)
+{
+	struct bt_hci_evt_hdr_s evt;
+	struct bt_hci_evt_le_meta_event_s meta_evt;
+	FAR uint8_t *data = buf->frame->io_data;
+	int ndx;
+	int len;
+
+	nvdbg("le_meta_event");
+
+	/* Minimal setup for the le meta event */
+
+	len = sizeof(struct bt_hci_evt_hdr_s) + sizeof(struct bt_hci_evt_le_meta_event_s);
+	ndx = 0;
+
+	evt.evt = BT_HCI_EVT_LE_META_EVENT;
+	evt.len = len;
+	memcpy(&data[ndx], &evt, sizeof(struct bt_hci_evt_hdr_s));
+	ndx += sizeof(struct bt_hci_evt_hdr_s);
+
+	meta_evt.subevent = BT_HCI_EVT_LE_ADVERTISING_REPORT;
+	memcpy(&data[ndx], &meta_evt, sizeof(struct bt_hci_evt_le_meta_event_s));
+	ndx += sizeof(struct bt_hci_evt_le_meta_event_s);
+
+	buf->frame->io_len = len;
+	buf->len = len;
+}
+
+static void btnull_format_scan_result_rsp(FAR struct bt_buf_s *buf, uint16_t opcode)
+{
+	struct bt_hci_ev_le_advertising_info_s adv_info;
+	FAR uint8_t *data = buf->frame->io_data;
+	int ndx;
+	int len;
+	uint8_t num_reports;
+	uint8_t rssi = 0x9f;
+
+	nvdbg("scan_result_rsp");
+
+	btnull_format_le_meta_event(buf, opcode);
+
+	len = buf->len + sizeof(num_reports) + sizeof(struct bt_hci_ev_le_advertising_info_s) + 31 + 1;
+	ndx = buf->len;
+
+	/* num report */
+	num_reports = 1;
+	memcpy(&data[ndx], &num_reports, sizeof(uint8_t));
+	ndx += sizeof(uint8_t);
+
+	/* adv_info */
+	memset(&adv_info, 0, sizeof(struct bt_hci_ev_le_advertising_info_s));
+	adv_info.evt_type = 0;
+	BLUETOOTH_ADDRCOPY(adv_info.addr.val, g_bt_addr.val);
+	adv_info.length = 31;
+	memcpy(&data[ndx], &adv_info, sizeof(struct bt_hci_ev_le_advertising_info_s));
+	ndx += sizeof(struct bt_hci_ev_le_advertising_info_s);
+
+	/* data copy */
+	memcpy(&data[ndx], &g_ad_data, 31);
+	ndx += 31;
+
+	/* rssi */
+	memcpy(&data[ndx], rssi, sizeof(uint8_t));
+
+	buf->frame->io_len = len;
+	buf->len = len;
+}
+
 static int btnull_send(FAR const struct bt_driver_s *dev, FAR struct bt_buf_s *buf)
 {
 	nvdbg("Bit bucket: length %d\n", (int)buf->len);
@@ -283,6 +433,15 @@ static int btnull_send(FAR const struct bt_driver_s *dev, FAR struct bt_buf_s *b
 		case BT_HCI_OP_READ_LOCAL_NAME:
 			btnull_format_read_local_name_rsp(outbuf, opcode);
 			break;
+
+		case BT_HCI_OP_LE_SET_SCAN_PARAMS:
+			btnull_process_set_scan_params_req(buf);
+			btnull_format_cmdcomplete(outbuf, opcode);
+
+		case BT_HCI_OP_LE_SET_SCAN_ENABLE:
+			btnull_process_scan_enable_req(buf);
+			btnull_format_scan_status_rsp(outbuf, opcode);
+			btnull_format_scan_result_rsp(outbuf, opcode);
 
 		default:
 			btnull_format_cmdcomplete(outbuf, opcode);
