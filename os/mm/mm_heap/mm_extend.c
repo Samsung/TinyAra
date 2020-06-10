@@ -57,6 +57,7 @@
 #include <tinyara/config.h>
 
 #include <assert.h>
+#include <sched.h>
 
 #include <tinyara/mm/mm.h>
 
@@ -106,6 +107,7 @@ void mm_extend(FAR struct mm_heap_s *heap, FAR void *mem, size_t size, int regio
 	/* Take the memory manager semaphore */
 
 	mm_takesemaphore(heap);
+	sched_lock();
 
 	/* Get the terminal node in the old heap.  The block to extend must
 	 * immediately follow this node.
@@ -133,6 +135,7 @@ void mm_extend(FAR struct mm_heap_s *heap, FAR void *mem, size_t size, int regio
 	newnode->preceding = oldnode->size | MM_ALLOC_BIT;
 
 	heap->mm_heapend[region] = newnode;
+	sched_unlock();
 	mm_givesemaphore(heap);
 
 	/* Finally "free" the new block of memory where the old terminal node was

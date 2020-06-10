@@ -57,6 +57,7 @@
 #include <tinyara/config.h>
 
 #include <assert.h>
+#include <sched.h>
 
 #include <tinyara/mm/mm.h>
 
@@ -140,6 +141,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment, size_t size)
 	 */
 
 	mm_takesemaphore(heap);
+	sched_lock();
 
 	/* Get the node associated with the allocation and the next node after
 	 * the allocation.
@@ -239,6 +241,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment, size_t size)
 	heapinfo_add_size(heap, node->pid, node->size);
 	heapinfo_update_total_size(heap, node->size, node->pid);
 #endif
+	sched_unlock();
 	mm_givesemaphore(heap);
 	return (FAR void *)alignedchunk;
 }

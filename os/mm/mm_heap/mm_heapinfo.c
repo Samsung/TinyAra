@@ -59,6 +59,7 @@
 #include <unistd.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <sched.h>
 #ifdef CONFIG_HEAPINFO_USER_GROUP
 #include <string.h>
 #include <tinyara/mm/heapinfo_internal.h>
@@ -140,6 +141,7 @@ void heapinfo_parse(FAR struct mm_heap_s *heap, int mode, pid_t pid)
 		 * Retake the semaphore for each region to reduce latencies
 		 */
 		mm_takesemaphore(heap);
+		sched_lock();
 
 		if (mode != HEAPINFO_SIMPLE) {
 			printf("****************************************************************\n");
@@ -197,6 +199,7 @@ void heapinfo_parse(FAR struct mm_heap_s *heap, int mode, pid_t pid)
 		if (mode != HEAPINFO_SIMPLE) {
 			printf("** PID(S) in Pid colum means that mem is used for stack of PID\n\n");
 		}
+		sched_unlock();
 		mm_givesemaphore(heap);
 	}
 #undef region
@@ -249,6 +252,7 @@ void heapinfo_parse(FAR struct mm_heap_s *heap, int mode, pid_t pid)
 	printf("\nAvailable fragmented memory segments in heap memory\n");
 
 	mm_takesemaphore(heap);
+	sched_lock();
 
 	for (ndx = 0; ndx < MM_NNODES; ++ndx) {
 		for (fnode = heap->mm_nodelist[ndx].flink; fnode && fnode->size; fnode = fnode->flink) {
@@ -257,6 +261,7 @@ void heapinfo_parse(FAR struct mm_heap_s *heap, int mode, pid_t pid)
 		}
 	}
 
+	sched_unlock();
 	mm_givesemaphore(heap);
 
 	for (ndx = 0; ndx < MM_NNODES; ++ndx) {

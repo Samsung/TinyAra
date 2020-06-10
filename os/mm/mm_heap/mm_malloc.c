@@ -57,6 +57,7 @@
 #include <tinyara/config.h>
 
 #include <debug.h>
+#include <sched.h>
 
 #include <tinyara/mm/mm.h>
 
@@ -135,6 +136,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 	/* We need to hold the MM semaphore while we muck with the nodelist. */
 
 	mm_takesemaphore(heap);
+	sched_lock();
 
 	/* Get the location in the node list to start the search
 	 * by converting the request size into a nodelist index.
@@ -222,6 +224,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 		ret = (void *)((char *)node + SIZEOF_MM_ALLOCNODE);
 	}
 
+	sched_unlock();
 	mm_givesemaphore(heap);
 
 	/* If CONFIG_DEBUG_MM is defined, then output the result of the allocation

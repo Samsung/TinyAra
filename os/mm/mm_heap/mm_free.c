@@ -58,6 +58,7 @@
 
 #include <assert.h>
 #include <debug.h>
+#include <sched.h>
 
 #include <tinyara/mm/mm.h>
 
@@ -118,6 +119,7 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
 	 */
 
 	mm_takesemaphore(heap);
+	sched_lock();
 
 	/* Map the memory chunk into a free node */
 
@@ -196,5 +198,6 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
 	/* Add the merged node to the nodelist */
 
 	mm_addfreechunk(heap, node);
+	sched_unlock();
 	mm_givesemaphore(heap);
 }

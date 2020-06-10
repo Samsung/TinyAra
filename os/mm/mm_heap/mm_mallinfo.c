@@ -59,6 +59,7 @@
 #include <assert.h>
 #include <debug.h>
 #include <unistd.h>
+#include <sched.h>
 #include <tinyara/mm/mm.h>
 #include <tinyara/sched.h>
 /****************************************************************************
@@ -110,6 +111,7 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
 		 */
 
 		mm_takesemaphore(heap);
+		sched_lock();
 
 		for (node = heap->mm_heapstart[region]; node < heap->mm_heapend[region]; node = (struct mm_allocnode_s *)((char *)node + node->size)) {
 			mvdbg("region=%d node=%p size=%p preceding=%p (%c)\n", region, node, node->size, (node->preceding & ~MM_ALLOC_BIT), (node->preceding & MM_ALLOC_BIT) ? 'A' : 'F');
@@ -127,6 +129,7 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
 			}
 		}
 
+		sched_unlock();
 		mm_givesemaphore(heap);
 
 		mvdbg("region=%d node=%p heapend=%p\n", region, node, heap->mm_heapend[region]);
