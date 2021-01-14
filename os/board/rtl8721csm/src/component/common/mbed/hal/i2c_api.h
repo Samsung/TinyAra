@@ -137,7 +137,7 @@ void i2c_slave_address(i2c_t *obj, int idx, uint32_t address, uint32_t mask);
   * @param  stop: specifies whether a STOP is issued after all the bytes are received.
   * @retval : the length of data received. 
   */
-int i2c_read(i2c_t *obj, int address, char *data, int length, int stop);
+int rtk_i2c_read(i2c_t *obj, int address, char *data, int length, int stop);
 
 /**
   * @brief  I2C master write in poll mode.
@@ -148,7 +148,7 @@ int i2c_read(i2c_t *obj, int address, char *data, int length, int stop);
   * @param  stop: specifies whether a STOP is issued after all the bytes are sent.
   * @retval : the length of data send. 
   */
-int i2c_write(i2c_t *obj, int address, const char *data, int length, int stop);
+int rtk_i2c_write(i2c_t *obj, int address, const char *data, int length, int stop);
 
 /**
   * @brief  I2C slave read in poll mode.
