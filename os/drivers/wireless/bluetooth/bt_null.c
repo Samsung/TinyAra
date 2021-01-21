@@ -109,6 +109,7 @@ uint8_t g_ad_data[31] = { 0x02, 0x01, 0x1a, 0x1b, 0xff, 0x75, 0x00, 0x42, 0x04, 
 						  0x19, 0x0f, 0x00, 0x02, 0x01, 0x37, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
 						  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 						};
+static pthread_mutex_t hci_receive_lock = PTHREAD_MUTEX_INITIALIZER;
 
 /****************************************************************************
  * Private Functions
@@ -326,11 +327,54 @@ static void btnull_format_le_adv_report(FAR struct bt_buf_s *buf)
 	buf->len = len;
 }
 
+void msleep(long msec)
+{
+	struct timespec ts;
+	ts.tv_sec = msec / 1000;
+	ts.tv_nsec = (msec % 1000) * 1000000;
+	nanosleep(&ts, NULL);
+}
+
+static int btnull_process_packet(void *arg)
+{
+	FAR struct bt_buf_s *outbuf = (struct bt_buf_s *)arg;
+
+	msleep(100);
+
+	pthread_mutex_lock(&hci_receive_lock);
+
+	bt_hci_receive(outbuf);
+
+	pthread_mutex_unlock(&hci_receive_lock);
+
+	return 0;
+}
+
+
+void bt_null_receive(FAR struct bt_buf_s *outbuf)
+{
+	int status = -1;
+	pthread_t tid;
+	pthread_attr_t attr;
+
+	status = pthread_attr_init(&attr);
+	if (status != 0) {
+		ndbg("pthread_attr_init() failed.\n");
+	}
+	status = pthread_create(&tid, &attr, (pthread_startroutine_t)btnull_process_packet, outbuf);
+	if (status < 0) {
+		ndbg("pthread_create() failed.\n\n");
+	}
+}
+
+
 static int btnull_adv_report(void *arg)
 {
 	FAR struct bt_buf_s *outbuf;
 
 	nvdbg("btnull_adv_report() enter.\n\n");
+
+	msleep(300);
 
 	outbuf = bt_buf_alloc(BT_EVT, NULL, 0);
 	if (outbuf == NULL) {
@@ -338,7 +382,6 @@ static int btnull_adv_report(void *arg)
 		return -ENOMEM;
 	}
 
-	sleep(1);
 	btnull_format_le_adv_report(outbuf);
 	bt_hci_receive(outbuf);
 
@@ -413,7 +456,7 @@ static int btnull_send(FAR const struct bt_driver_s *dev, FAR struct bt_buf_s *b
 
 		nvdbg("Send CMD complete event\n");
 
-		bt_hci_receive(outbuf);
+		bt_null_receive(outbuf);
 	}
 
 	return buf->len;
