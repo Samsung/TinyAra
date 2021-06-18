@@ -321,6 +321,13 @@ static uint8_t *dhcps_add_offer_options(uint8_t *optptr)
 	*optptr++ = ip4_addr3(&ipaddr);
 	*optptr++ = 255;
 
+	*optptr++ = DHCP_OPTION_DNS_SERVER;
+	*optptr++ = 4;
+	*optptr++ = 8;
+	*optptr++ = 8;
+	*optptr++ = 8;
+	*optptr++ = 8;
+
 	return optptr;
 }
 
