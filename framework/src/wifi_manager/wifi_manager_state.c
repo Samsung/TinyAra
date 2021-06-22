@@ -627,9 +627,8 @@ wifi_manager_result_e _handler_on_softap_state(wifimgr_msg_s *msg)
 		WIFIMGR_CHECK_RESULT(_wifimgr_scan((wifi_manager_ap_config_s *)msg->param), "fail scan", WIFI_MANAGER_FAIL);
 		WIFIMGR_STORE_PREV_STATE;
 		WIFIMGR_SET_STATE(WIFIMGR_SCANNING);
-#ifdef CONFIG_WIFIMGR_DISABLE_DHCPS
 	} else if (msg->event == EVT_JOINED) {
-#else
+#ifndef CONFIG_WIFIMGR_DISABLE_DHCPS
 	/* wifi manager passes the callback after the dhcp server gives a station an IP address*/
 	} else if (msg->event == EVT_DHCPS_ASSIGN_IP) {
 		if (dhcps_add_node((dhcp_node_s *)msg->param) == DHCP_EXIST) {

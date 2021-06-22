@@ -43,9 +43,8 @@ static char *wifimgr_evt_str[] = {
 	"EVT_STA_DISCONNECTED",
 #ifndef CONFIG_WIFIMGR_DISABLE_DHCPS
 	"EVT_DHCPS_ASSIGN_IP",
-#else
-	"EVT_JOINED",
 #endif
+	"EVT_JOINED",
 	"EVT_LEFT",
 	"EVT_SCAN_DONE",
 	"EVT_NONE",
@@ -96,11 +95,9 @@ void _wifi_utils_disconnect_event(void *arg)
 
 void _wifi_utils_join_event(void *arg)
 {
-#ifdef CONFIG_WIFIMGR_DISABLE_DHCPS
 	WM_ENTER;
 	wifimgr_msg_s msg = {EVT_JOINED, WIFI_MANAGER_FAIL, NULL, NULL};
 	WIFIMGR_CHECK_RESULT_NORET(wifimgr_post_message(&msg), "[WM] handle join event fail\n");
-#endif
 	return;
 }
 

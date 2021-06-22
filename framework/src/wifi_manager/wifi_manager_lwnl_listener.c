@@ -108,9 +108,7 @@ static int _lwnl_call_event(int fd, lwnl_cb_status status, int len)
 		LWNL_SET_MSG(&g_msg, EVT_STA_DISCONNECTED, WIFI_MANAGER_FAIL, NULL, NULL);
 		break;
 	case LWNL_SOFTAP_STA_JOINED:
-#ifdef CONFIG_WIFIMGR_DISABLE_DHCPS
 		LWNL_SET_MSG(&g_msg, EVT_JOINED, WIFI_MANAGER_FAIL, NULL, NULL);
-#endif
 		break;
 	case LWNL_SOFTAP_STA_LEFT:
 		LWNL_SET_MSG(&g_msg, EVT_LEFT, WIFI_MANAGER_FAIL, NULL, NULL);

@@ -37,9 +37,8 @@ enum _wifimgr_evt {
 	EVT_STA_DISCONNECTED,	// Event that external STA disconnected from WiFi AP
 #ifndef CONFIG_WIFIMGR_DISABLE_DHCPS
 	EVT_DHCPS_ASSIGN_IP,	// Event that SoftAP got IP address
-#else
-	EVT_JOINED,				// Event that new STA joined softAP
 #endif
+	EVT_JOINED,				// Event that new STA joined softAP
 	EVT_LEFT,				// Event that external STA device left softAP
 	EVT_SCAN_DONE,			// Event that WiFi scanning over WLAN channels is done
 	EVT_NONE,
