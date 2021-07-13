@@ -22,13 +22,13 @@
 #include <tinyara/lwnl/lwnl.h>
 #include <tinyara/fs/fs.h>
 
-#define LWNL_NPOLLWAITERS 5
+#define LWNL_NPOLLWAITERS 10
 
 struct lwnl_event;
 struct lwnl_queue;
 
 void lwnl_queue_initialize(void);
-int lwnl_add_listener(struct file *filep);
+int lwnl_add_listener(struct file *filep, lwnl_dev_type type);
 int lwnl_remove_listener(struct file *filep);
 int lwnl_get_event(struct file *filep, char *buf, int len);
 int lwnl_check_queue(struct file *filep);

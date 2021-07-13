@@ -185,7 +185,7 @@ int preapp_start(int argc, char *argv[])
 #endif
 
 #if defined(CONFIG_WIFI_MANAGER)
-	(void)wifimgr_run_msghandler();
+	//(void)wifimgr_run_msghandler();
 #endif
 
 #if defined(CONFIG_BLE_MANAGER)

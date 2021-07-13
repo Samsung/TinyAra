@@ -61,6 +61,7 @@ typedef enum {
 	LWNL_DEV_WIFI,
 	LWNL_DEV_BLE,
 	LWNL_DEV_STACK,
+	LWNL_DEV_TYPE_MAX,
 } lwnl_dev_type;
 
 typedef struct {
@@ -95,6 +96,10 @@ typedef struct {
 	uint32_t data_len;
 	bool md;
 } lwnl_cb_data;
+
+struct sockaddr_lwnl {
+	lwnl_dev_type dev_type;
+};
 
 struct lwnl_lowerhalf_s;
 struct lwnl_upperhalf_s;
