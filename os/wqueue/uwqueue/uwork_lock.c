@@ -109,13 +109,15 @@ int work_lock(void)
 {
 	int ret;
 #ifdef CONFIG_BUILD_PROTECTED
-	ret = sem_wait(&g_usrsem);
+	sem_t *usrsem = get_usrsem();
+	ret = sem_wait(usrsem);
 	if (ret < 0) {
 		DEBUGASSERT(errno == EINTR);
 		return -EINTR;
 	}
 #else
-	ret = pthread_mutex_lock(&g_usrmutex);
+	pthread_mutex_t *usrmutex = get_usrmutex();
+	ret = pthread_mutex_lock(usrmutex);
 	if (ret != 0) {
 		DEBUGASSERT(ret == EINTR);
 		return -EINTR;
@@ -141,8 +143,10 @@ int work_lock(void)
 void work_unlock(void)
 {
 #ifdef CONFIG_BUILD_PROTECTED
-	(void)sem_post(&g_usrsem);
+	sem_t *usrsem = get_usrsem();
+	(void)sem_post(usrsem);
 #else
-	(void)pthread_mutex_unlock(&g_usrmutex);
+	pthread_mutex_t *usrmutex = get_usrmutex();
+	(void)pthread_mutex_unlock(usrmutex);
 #endif
 }

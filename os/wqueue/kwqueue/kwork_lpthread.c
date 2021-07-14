@@ -84,7 +84,7 @@
 
 /* The state of the kernel mode, low priority work queue(s). */
 
-struct lp_wqueue_s g_lpwork;
+static struct lp_wqueue_s g_lpwork;
 
 /****************************************************************************
  * Private Data
@@ -128,8 +128,9 @@ static int work_lpthread(int argc, char *argv[])
 
 	/* Find out thread index by search the workers in g_lpwork */
 
+	struct lp_wqueue_s *lwq = get_lpwork();
 	for (wndx = 0, i = 0; i < CONFIG_SCHED_LPNTHREADS; i++) {
-		if (g_lpwork.worker[i].pid == me) {
+		if (lwq->worker[i].pid == me) {
 			wndx = i;
 			break;
 		}
@@ -152,7 +153,7 @@ static int work_lpthread(int argc, char *argv[])
 			 * to wait indefinitely until a signal is received.
 			 */
 
-			work_process((FAR struct wqueue_s *)&g_lpwork, wndx);
+			work_process((FAR struct wqueue_s *)lwq, wndx);
 		} else
 #endif
 		{
@@ -173,7 +174,7 @@ static int work_lpthread(int argc, char *argv[])
 			 * period provided by g_lpwork.delay expires.
 			 */
 
-			work_process((FAR struct wqueue_s *)&g_lpwork, 0);
+			work_process((FAR struct wqueue_s *)lwq, 0);
 		}
 	}
 
@@ -183,6 +184,11 @@ static int work_lpthread(int argc, char *argv[])
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+struct lp_wqueue_s *get_lpwork(void)
+{
+	return &g_lpwork;
+}
 
 /****************************************************************************
  * Name: work_lpstart
@@ -206,9 +212,10 @@ int work_lpstart(void)
 
 	/* Initialize work queue data structures */
 
-	memset(&g_lpwork, 0, sizeof(struct wqueue_s));
+	struct lp_wqueue_s *lwq = get_lpwork();
+	memset(lwq, 0, sizeof(struct wqueue_s));
 
-	dq_init(&g_lpwork.q);
+	dq_init(&lwq->q);
 
 	/* Don't permit any of the threads to run until we have fully initialized
 	 * g_lpwork.
@@ -233,10 +240,10 @@ int work_lpstart(void)
 			return -errcode;
 		}
 
-		g_lpwork.worker[wndx].pid = (pid_t)pid;
-		g_lpwork.worker[wndx].busy = true;
+		lwq->worker[wndx].pid = (pid_t)pid;
+		lwq->worker[wndx].busy = true;
 	}
 
 	sched_unlock();
-	return g_lpwork.worker[0].pid;
+	return lwq->worker[0].pid;
 }

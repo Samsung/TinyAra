@@ -115,15 +115,15 @@ int work_cancel(int qid, FAR struct work_s *work)
 #ifdef CONFIG_SCHED_HPWORK
 	if (qid == HPWORK) {
 		/* Cancel high priority work */
-
-		return work_qcancel((FAR struct wqueue_s *)&g_hpwork, work);
+		struct hp_wqueue_s *hwq = get_hpwork();
+		return work_qcancel((FAR struct wqueue_s *)hwq, work);
 	} else
 #endif
 #ifdef CONFIG_SCHED_LPWORK
 		if (qid == LPWORK) {
 			/* Cancel low priority work */
-
-			return work_qcancel((FAR struct wqueue_s *)&g_lpwork, work);
+			struct lp_wqueue_s *lwq = get_lpwork();
+			return work_qcancel((FAR struct wqueue_s *)lwq, work);
 		} else
 #endif
 		{

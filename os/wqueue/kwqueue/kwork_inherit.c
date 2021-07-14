@@ -333,8 +333,9 @@ void lpwork_boostpriority(uint8_t reqprio)
 
 	/* Adjust the priority of every worker thread */
 
+	struct lp_wqueue_s *lwq = get_lpwork();
 	for (wndx = 0; wndx < CONFIG_SCHED_LPNTHREADS; wndx++) {
-		lpwork_boostworker(g_lpwork.worker[wndx].pid, reqprio);
+		lpwork_boostworker(lwq->worker[wndx].pid, reqprio);
 	}
 
 	sched_unlock();
@@ -377,8 +378,9 @@ void lpwork_restorepriority(uint8_t reqprio)
 
 	/* Adjust the priority of every worker thread */
 
+	struct lp_wqueue_s *lwq = get_lpwork();
 	for (wndx = 0; wndx < CONFIG_SCHED_LPNTHREADS; wndx++) {
-		lpwork_restoreworker(g_lpwork.worker[wndx].pid, reqprio);
+		lpwork_restoreworker(lwq->worker[wndx].pid, reqprio);
 	}
 
 	sched_unlock();

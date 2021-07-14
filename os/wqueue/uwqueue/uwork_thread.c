@@ -84,14 +84,14 @@
 
 /* The state of the user mode work queue. */
 
-struct wqueue_s g_usrwork;
+static struct wqueue_s g_usrwork;
 
 /* This semaphore supports exclusive access to the user-mode work queue */
 
 #ifdef CONFIG_BUILD_PROTECTED
-sem_t g_usrsem;
+static sem_t g_usrsem;
 #else
-pthread_mutex_t g_usrmutex;
+static pthread_mutex_t g_usrmutex;
 #endif
 
 /****************************************************************************
@@ -127,6 +127,7 @@ static int work_usrthread(int argc, char *argv[])
 static pthread_addr_t work_usrthread(pthread_addr_t arg)
 #endif
 {
+	struct wqueue_s *usrwq = get_usrwork();
 	/* Loop forever */
 
 	for (;;) {
@@ -134,7 +135,7 @@ static pthread_addr_t work_usrthread(pthread_addr_t arg)
 		 * while we process items in the work list.
 		 */
 
-		work_process(&g_usrwork, 0);
+		work_process(usrwq, 0);
 	}
 
 #ifdef CONFIG_BUILD_PROTECTED
@@ -147,6 +148,22 @@ static pthread_addr_t work_usrthread(pthread_addr_t arg)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+struct wqueue_s *get_usrwork(void)
+{
+	return &g_usrwork;
+}
+
+#ifdef CONFIG_BUILD_PROTECTED
+sem_t *get_usrsem(void)
+{
+	return &g_usrsem;
+}
+#else
+pthread_mutex_t *get_usrmutex(void)
+{
+	return &g_usrmutex;
+}
+#endif
 
 /****************************************************************************
  * Name: work_usrstart
@@ -167,7 +184,8 @@ int work_usrstart(void)
 {
 	/* Initialize work queue data structures */
 
-	dq_init(&g_usrwork.q);
+	struct wqueue_s *usrwq = get_usrwork();
+	dq_init(&usrwq->q);
 
 #ifdef CONFIG_BUILD_PROTECTED
 	{
@@ -177,16 +195,16 @@ int work_usrstart(void)
 
 		/* Start a user-mode worker thread for use by applications. */
 
-		g_usrwork.worker[0].pid = task_create("uwork", CONFIG_SCHED_USRWORKPRIORITY, CONFIG_SCHED_USRWORKSTACKSIZE, (main_t)work_usrthread, (FAR char *const *)NULL);
+		usrwq->worker[0].pid = task_create("uwork", CONFIG_SCHED_USRWORKPRIORITY, CONFIG_SCHED_USRWORKSTACKSIZE, (main_t)work_usrthread, (FAR char *const *)NULL);
 
-		DEBUGASSERT(g_usrwork.worker[0].pid > 0);
-		if (g_usrwork.worker[0].pid < 0) {
+		DEBUGASSERT(usrwq->worker[0].pid > 0);
+		if (usrwq->worker[0].pid < 0) {
 			int errcode = errno;
 			DEBUGASSERT(errcode > 0);
 			return -errcode;
 		}
-		g_usrwork.worker[0].busy = true;
-		return g_usrwork.worker[0].pid;
+		usrwq->worker[0].busy = true;
+		return usrwq->worker[0].pid;
 	}
 #else
 	{
@@ -218,9 +236,9 @@ int work_usrstart(void)
 
 		(void)pthread_detach(usrwork);
 
-		g_usrwork.worker[0].pid = (pid_t)usrwork;
-		g_usrwork.worker[0].busy = true;
-		return g_usrwork.worker[0].pid;
+		usrwq->worker[0].pid = (pid_t)usrwork;
+		usrwq->worker[0].busy = true;
+		return usrwq->worker[0].pid;
 	}
 #endif
 }

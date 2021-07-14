@@ -55,7 +55,8 @@ int work_signal(int qid)
 	/* Get the process ID of the worker thread */
 
 	if (qid == USRWORK) {
-		pid = g_usrwork.worker[0].pid;
+		struct wqueue_s *usrwq = get_usrwork();
+		pid = usrwq->worker[0].pid;
 	} else {
 		return -EINVAL;
 	}

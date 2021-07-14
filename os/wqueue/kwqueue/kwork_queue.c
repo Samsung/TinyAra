@@ -130,7 +130,8 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker, FAR void *arg,
 	if (qid == HPWORK) {
 		/* Cancel high priority work */
 
-		result = work_qqueue((FAR struct wqueue_s *)&g_hpwork, work, worker, arg, delay);
+		struct hp_wqueue_s *hwq = get_hpwork();
+		result = work_qqueue((FAR struct wqueue_s *)hwq, work, worker, arg, delay);
 		if (result != OK) {
 			return result;
 		}
@@ -141,7 +142,8 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker, FAR void *arg,
 		if (qid == LPWORK) {
 			/* Cancel low priority work */
 
-			result = work_qqueue((FAR struct wqueue_s *)&g_lpwork, work, worker, arg, delay);
+			struct lp_wqueue_s *lwq = get_lpwork();
+			result = work_qqueue((FAR struct wqueue_s *)lwq, work, worker, arg, delay);
 			if (result != OK) {
 				return result;
 			}
