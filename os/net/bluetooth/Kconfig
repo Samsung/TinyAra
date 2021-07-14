@@ -97,6 +97,36 @@ config BLUETOOTH_BUFFER_IRQRESERVE
 		interrupt level.  This setting only needs to be non-zero if your
 		low-level Bluetooth driver needs to do such allocations.
 
+config BT_PRIVACY
+	bool "Privacy Feature"
+	default n
+	---help---
+		Enable local Privacy Feature support. This makes it possible
+		to use Resolvable Private Addresses (RPAs).
+
+config BT_PHY_UPDATE
+	bool "PHY Update"
+	default y
+	---help---
+		Enable support for Bluetooth 5.0 PHY Update Procedure.
+
+config BT_AUTO_PHY_UPDATE
+	bool "Auto-initiate PHY Update Procedure"
+	depends on BT_PHY_UPDATE
+	default y
+	---help---
+		Initiate PHY Update Procedure on connection establishment.
+
+		Disable this if you want PHY Update Procedure feature supported but
+		want to rely on remote device to initiate the procedure at its
+		discretion.
+
+config BT_DATA_LEN_UPDATE
+	bool "Data Length Update"
+	default y
+	---help---
+		Enable support for Bluetooth v4.2 LE Data Length Update procedure
+
 menu "Kernel Thread Configuration"
 
 config BLUETOOTH_TXCMD_STACKSIZE

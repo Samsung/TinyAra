@@ -350,6 +350,10 @@
 #define LE_CONN_LATENCY              0x0000
 #define LE_CONN_TIMEOUT              0x002a
 
+/* Supported Commands */
+#define BT_CMD_TEST(cmd, octet, bit)            (cmd[octet] & BIT(bit))
+#define BT_CMD_LE_STATES(cmd)                   BT_CMD_TEST(cmd, 28, 3)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -555,6 +559,82 @@ struct hci_rp_read_local_name_s {
 #define BT_HCI_OP_LE_READ_REMOTE_FEATURES     BT_OP(BT_OGF_LE, 0x0016)
 struct bt_hci_cp_le_read_remote_features_s {
 	uint16_t handle;
+} packed_struct;
+
+#define BT_HCI_OP_READ_SUPPORTED_COMMANDS     BT_OP(BT_OGF_INFO, 0x0002)
+struct bt_hci_rp_read_supported_commands_s {
+	uint8_t status;
+	uint8_t commands[64];
+} packed_struct;
+
+#define BT_HCI_OP_LE_READ_SUPP_STATES         BT_OP(BT_OGF_LE, 0x001c)
+struct bt_hci_rp_le_read_supp_states_s {
+	uint8_t status;
+	uint8_t le_states[8];
+} packed_struct;
+
+#define BT_HCI_OP_LE_SET_DATA_LEN             BT_OP(BT_OGF_LE, 0x0022)
+struct bt_hci_cp_le_set_data_len_s {
+	uint16_t handle;
+	uint16_t tx_octets;
+	uint16_t tx_time;
+} packed_struct;
+
+struct bt_hci_rp_le_set_data_len_s {
+	uint8_t status;
+	uint16_t handle;
+} packed_struct;
+
+#define BT_HCI_OP_LE_READ_MAX_DATA_LEN        BT_OP(BT_OGF_LE, 0x002f)
+struct bt_hci_rp_le_read_max_data_len_s {
+	uint8_t status;
+	uint16_t max_tx_octets;
+	uint16_t max_tx_time;
+	uint16_t max_rx_octets;
+	uint16_t max_rx_time;
+} packed_struct;
+
+#define BT_HCI_LE_PHY_1M                        0x01
+#define BT_HCI_LE_PHY_2M                        0x02
+#define BT_HCI_LE_PHY_CODED                     0x03
+
+#define BT_HCI_OP_LE_READ_PHY                   BT_OP(BT_OGF_LE, 0x0030)
+struct bt_hci_cp_le_read_phy_s {
+	uint16_t handle;
+} packed_struct;
+
+struct bt_hci_rp_le_read_phy_s {
+	uint8_t status;
+	uint16_t handle;
+	uint8_t tx_phy;
+	uint8_t rx_phy;
+} packed_struct;
+
+#define BT_HCI_LE_PHY_TX_ANY                    BIT(0)
+#define BT_HCI_LE_PHY_RX_ANY                    BIT(1)
+
+#define BT_HCI_LE_PHY_PREFER_1M                 BIT(0)
+#define BT_HCI_LE_PHY_PREFER_2M                 BIT(1)
+#define BT_HCI_LE_PHY_PREFER_CODED              BIT(2)
+
+#define BT_HCI_OP_LE_SET_DEFAULT_PHY            BT_OP(BT_OGF_LE, 0x0031)
+struct bt_hci_cp_le_set_default_phy_s {
+	uint8_t all_phys;
+	uint8_t tx_phys;
+	uint8_t rx_phys;
+} packed_struct;
+
+#define BT_HCI_LE_PHY_CODED_ANY                 0x00
+#define BT_HCI_LE_PHY_CODED_S2                  0x01
+#define BT_HCI_LE_PHY_CODED_S8                  0x02
+
+#define BT_HCI_OP_LE_SET_PHY                    BT_OP(BT_OGF_LE, 0x0032)
+struct bt_hci_cp_le_set_phy_s {
+	uint16_t handle;
+	uint8_t all_phys;
+	uint8_t tx_phys;
+	uint8_t rx_phys;
+	uint16_t phy_opts;
 } packed_struct;
 
 /* Event definitions */

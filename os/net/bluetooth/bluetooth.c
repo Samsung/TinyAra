@@ -309,6 +309,61 @@ static int bt_conn_init(void)
 	return err;
 }
 
+static void le_read_supp_states_complete(struct bt_buf_s *buf)
+{
+        struct bt_hci_rp_le_read_supp_states_s *rp = (void *)buf->data;
+
+        ndbg("status %u", rp->status);
+
+        g_btdev.le.states = sys_get_le64(rp->le_states);
+}
+
+static void read_supported_commands_complete(struct bt_buf_s *buf)
+{
+	struct bt_hci_rp_read_supported_commands_s *rp = (void *)buf->data;
+
+	ndbg("status %u", rp->status);
+
+	memcpy(g_btdev.supported_commands, rp->commands, sizeof(g_btdev.supported_commands));
+
+	/*
+	 * Report "LE Read Local P-256 Public Key" and "LE Generate DH Key" as
+	 * supported if TinyCrypt ECC is used for emulation.
+	 */
+	if (IS_ENABLED(CONFIG_BT_TINYCRYPT_ECC)) {
+		g_btdev.supported_commands[34] |= 0x02;
+		g_btdev.supported_commands[34] |= 0x04;
+	}
+}
+
+static int hci_common_init(void)
+{
+	FAR struct bt_buf_s *rsp;
+	int err;
+
+	/* Read Local Supported Commands */
+	err = bt_hci_cmd_send_sync(BT_HCI_OP_READ_SUPPORTED_COMMANDS, NULL, &rsp);
+	if (err) {
+		return err;
+	}
+
+	read_supported_commands_complete(rsp);
+	bt_buf_release(rsp);
+
+	/* Read LE Supported States */
+	if (BT_CMD_LE_STATES(g_btdev.supported_commands)) {
+		err = bt_hci_cmd_send_sync(BT_HCI_OP_LE_READ_SUPP_STATES, NULL, &rsp);
+		if (err) {
+			return err;
+		}
+
+		le_read_supp_states_complete(rsp);
+		bt_buf_release(rsp);
+	}
+
+	return 0;
+}
+
 static int bt_init(void)
 {
 	int ret = 0;
@@ -316,6 +371,12 @@ static int bt_init(void)
 	ret = hci_initialize();
 	if (ret < 0) {
 		ndbg("ERROR:  hci_initialize failed: %d\n", ret);
+		return ret;
+	}
+
+	ret = hci_common_init();
+	if (ret < 0) {
+		ndbg("ERROR:  hci_common_init failed: %d\n", ret);
 		return ret;
 	}
 
