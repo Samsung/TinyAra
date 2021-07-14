@@ -1,0 +1,15 @@
+#
+# For a description of the syntax of this configuration file,
+# see kconfig-language at https://www.kernel.org/doc/Documentation/kbuild/kconfig-language.txt
+#
+
+config EXAMPLES_ARAPLAYER
+	bool "AraPlayer example"
+	default n
+	depends on HAVE_CXX && HAVE_CXXINITIALIZE && MEDIA
+	---help---
+		Enable the AraPlayer example
+
+config USER_ENTRYPOINT
+	string
+	default "AraPlayerService_main" if ENTRY_ARAPLAYER
