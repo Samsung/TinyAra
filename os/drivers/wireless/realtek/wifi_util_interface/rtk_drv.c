@@ -59,7 +59,7 @@ struct netdev *g_rtk_netdev;
  ****************************************************************************/
 static trwifi_result_e rtkdrv_init(struct netdev *dev);
 static trwifi_result_e rtkdrv_deinit(struct netdev *dev);
-static trwifi_result_e rtkdrv_scan_ap(struct netdev *dev, trwifi_ap_config_s *config);
+static trwifi_result_e rtkdrv_scan_ap(struct netdev *dev, trwifi_scan_config_s *config);
 static trwifi_result_e rtkdrv_connect_ap(struct netdev *dev, trwifi_ap_config_s *ap_connect_config, void *arg);
 static trwifi_result_e rtkdrv_disconnect_ap(struct netdev *dev, void *arg);
 static trwifi_result_e rtkdrv_get_info(struct netdev *dev, trwifi_info *wifi_info);
@@ -226,7 +226,7 @@ trwifi_result_e rtkdrv_deinit(struct netdev *dev)
 	return result;
 }
 
-trwifi_result_e rtkdrv_scan_ap(struct netdev *dev, trwifi_ap_config_s *config)
+trwifi_result_e rtkdrv_scan_ap(struct netdev *dev, trwifi_scan_config_s *config)
 {
 	RTKDRV_ENTER;
 	trwifi_result_e result = TRWIFI_FAIL;

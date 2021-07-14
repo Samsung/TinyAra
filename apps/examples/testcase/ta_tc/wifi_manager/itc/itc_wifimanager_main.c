@@ -550,7 +550,7 @@ static void itc_wifimanager_scan_ap_p(void)
 	ret = wifi_manager_init(&wifi_callbacks);
 	TC_ASSERT_EQ("wifi_manager_init", ret, WIFI_MANAGER_SUCCESS);
 
-	ret = wifi_manager_scan_ap();
+	ret = wifi_manager_scan_ap(NULL);
 	TC_ASSERT_EQ_CLEANUP("wifi_manager_scan_ap", ret, WIFI_MANAGER_SUCCESS, wifi_manager_deinit());
 	WIFITEST_WAIT;
 

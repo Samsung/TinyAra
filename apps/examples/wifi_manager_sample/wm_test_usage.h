@@ -47,7 +47,9 @@
 	"\n run scan:\n"							\
 	"	 wm_test scan\n"						\
 	" run scan specific SSID:\n"				\
-	"	 wm_test scan [ssid]\n"
+	"	 wm_test scan ssid [ssid]\n"			\
+	" run scan specific channel:\n"				\
+	"	 wm_test scan ch [channel]\n"
 
 #define WT_PROFILE_USAGE										\
 	"\n set a profile:\n"										\

@@ -28,8 +28,7 @@
  * @brief Provides APIs for Wi-Fi Manager
  */
 
-#ifndef WIFI_MANAGER_H
-#define WIFI_MANAGER_H
+#pragma once
 
 #include <time.h>
 
@@ -43,8 +42,8 @@ extern "C" {
 #define WIFIMGR_SSID_LEN           32
 #define WIFIMGR_PASSPHRASE_LEN     64
 /**
-  * @brief <b> wifi MAC/PHY standard types
-  */
+ * @brief <b> wifi MAC/PHY standard types
+ */
 typedef enum {
 	WIFI_MANAGER_IEEE_80211_LEGACY,             /**<  IEEE 802.11a/g/b           */
 	WIFI_MANAGER_IEEE_80211_A,                  /**<  IEEE 802.11a               */
@@ -233,6 +232,12 @@ typedef struct {
 	wifi_manager_ap_crypto_type_e ap_crypto_type;  /**<  @ref wifi_utils_ap_crypto_type */
 } wifi_manager_ap_config_s;
 
+typedef struct {
+	unsigned int channel;                             /**<  wifi channel, =0 is full channel scan */
+	char ssid[WIFIMGR_SSID_LEN + 1];                  /**<  Service Set Identification            */
+	unsigned int ssid_length;                         /**<  Service Set Identification Length     */
+} wifi_manager_scan_config_s;
+
 /**
  * @brief Specify Wi-Fi Manager internal stats information
  */
@@ -275,10 +280,10 @@ typedef enum {
  * @details @b #include <wifi_manager/wifi_manager.h>
  * @param[in] wmcb callback functions called when wi-fi events happen
  * @return On success, WIFI_MANAGER_SUCCESS (i.e., 0) is returned. On failure, non-zero value is returned.
+ * @API_type: synchronous
+ * @callback: none
  * @since TizenRT v1.1
  */
-// API type: synchronous
-// callback: none
 wifi_manager_result_e wifi_manager_init(wifi_manager_cb_s *wmcb);
 
 /**
@@ -286,10 +291,10 @@ wifi_manager_result_e wifi_manager_init(wifi_manager_cb_s *wmcb);
  * @details @b #include <wifi_manager/wifi_manager.h>
  * @param[in] none
  * @return On success, WIFI_MANAGER_SUCCESS (i.e., 0) is returned. On failure, non-zero value is returned.
+ * @API_type: synchronous
+ * @callback: none
  * @since TizenRT v1.1
  */
-// API type: synchronous
-// callback: none
 wifi_manager_result_e wifi_manager_deinit(void);
 
 /**
@@ -299,10 +304,11 @@ wifi_manager_result_e wifi_manager_deinit(void);
  *          then it have to call wifi_manager_init to run Wi-Fi
  * @param[in] wmcb callback functions called when wi-fi events happen
  * @return On success, WIFI_MANAGER_SUCCESS (i.e., 0) is returned. On failure, non-zero value is returned.
+ * @API type: synchronous
+ * @callback: none
  * @since TizenRT v2.0
  */
-// API type: synchronous
-// callback: none
+
 wifi_manager_result_e wifi_manager_register_cb(wifi_manager_cb_s *wmcb);
 
 /**
@@ -310,10 +316,10 @@ wifi_manager_result_e wifi_manager_register_cb(wifi_manager_cb_s *wmcb);
  * @details @b #include <wifi_manager/wifi_manager.h>
  * @param[in] wmcb callback functions are used to find registered callback
  * @return On success, WIFI_MANAGER_SUCCESS (i.e., 0) is returned. On failure, non-zero value is returned.
+ * @API type: synchronous
+ * @callback: none
  * @since TizenRT v2.0
  */
-// API type: synchronous
-// callback: none
 wifi_manager_result_e wifi_manager_unregister_cb(wifi_manager_cb_s *wmcb);
 
 /**
@@ -322,10 +328,10 @@ wifi_manager_result_e wifi_manager_unregister_cb(wifi_manager_cb_s *wmcb);
  * @param[in] mode Wi-Fi mode (station or AP)
  * @param[in] config In case of AP mode, AP configuration information should be given including ssid, channel, and passphrase.
  * @return On success, WIFI_MANAGER_SUCCESS (i.e., 0) is returned. On failure, non-zero value is returned.
+ * @API type: synchronous
+ * @callback: none
  * @since TizenRT v1.1
  */
-// API type: synchronous
-// callback: none
 wifi_manager_result_e wifi_manager_set_mode(wifi_manager_mode_e mode, wifi_manager_softap_config_s *config);
 
 /**
@@ -333,10 +339,10 @@ wifi_manager_result_e wifi_manager_set_mode(wifi_manager_mode_e mode, wifi_manag
  * @details @b #include <wifi_manager/wifi_manager.h>
  * @param[out] retrieved information including  mode, connection status, ssid, received signal strengh indication, and ip address.
  * @return On success, WIFI_MANAGER_SUCCESS (i.e., 0) is returned. On failure, non-zero value is returned.
+ * @API type: synchronous
+ * @callback: none
  * @since TizenRT v1.1
  */
-// API type: synchronous
-// callback: none
 wifi_manager_result_e wifi_manager_get_info(wifi_manager_info_s *info);
 
 /**
@@ -344,22 +350,21 @@ wifi_manager_result_e wifi_manager_get_info(wifi_manager_info_s *info);
  * @details @b #include <wifi_manager/wifi_manager.h>
  * @param[in] config ssid, passphrase, authentication type, and crypto type of the access point which the wi-fi interface connect to.
  * @return On success, WIFI_MANAGER_SUCCESS (i.e., 0) is returned. On failure, non-zero value is returned.
+ * @API type: asynchronous
+ * @callback: sta_connected
  * @since TizenRT v1.1
  */
-// API type: asynchronous
-// callback: sta_connected
 wifi_manager_result_e wifi_manager_connect_ap(wifi_manager_ap_config_s *config);
-
 
 /**
  * @brief Disconnect from the connected access point
  * @details @b #include <wifi_manager/wifi_manager.h>
  * @param[in] none
  * @return On success, WIFI_MANAGER_SUCCESS (i.e., 0) is returned. On failure, non-zero value is returned.
+ * @API type: asynchronous
+ * @callback: sta_disconnected
  * @since TizenRT v1.1
  */
-// API type: asynchronous
-// callback: sta_disconnected
 wifi_manager_result_e wifi_manager_disconnect_ap(void);
 
 /**
@@ -367,21 +372,30 @@ wifi_manager_result_e wifi_manager_disconnect_ap(void);
  * @details @b #include <wifi_manager/wifi_manager.h>
  * @param[in] none
  * @return On success, WIFI_MANAGER_SUCCESS (i.e., 0) is returned. On failure, non-zero value is returned.
+ * @API_type: asynchronous
+ * @callback: scan_ap_done
  * @since TizenRT v1.1
  */
-// API type: asynchronous
-// callback: scan_ap_done
-wifi_manager_result_e wifi_manager_scan_ap(void);
+/* scan type
+ *     full scan: config is null
+ *     scan with specific SSID: ssid is set in config
+ *     scan with specific channel: channel is set in config
+ *
+ * invalid usage
+ *     if both SSID and channel are set in config then it'll return error.
+ */
+wifi_manager_result_e wifi_manager_scan_ap(wifi_manager_scan_config_s *config);
 
 /**
  * @brief Scan nearby access points
  * @details @b #include <wifi_manager/wifi_manager.h>
  * @param[in] config Required AP configuration, which SSID should be given.
  * @return On success, WIFI_MANAGER_SUCCESS (i.e., 0) is returned. On failure, non-zero value is returned.
+ * @API type: asynchronous
+ * @callback: scan_ap_done
  * @since TizenRT v3.0
+ * @deprecated TizenRT v3.1
  */
-// API type: asynchronous
-// callback: scan_ap_done
 wifi_manager_result_e wifi_manager_scan_specific_ap(wifi_manager_ap_config_s *config);
 
 /**
@@ -389,10 +403,10 @@ wifi_manager_result_e wifi_manager_scan_specific_ap(wifi_manager_ap_config_s *co
  * @details @b #include <wifi_manager/wifi_manager.h>
  * @param[in] config AP configuration information should be given including ssid, channel, and passphrase.
  * @return On success, WIFI_MANAGER_SUCCESS (i.e., 0) is returned. On failure, non-zero value is returned.
+ * @API type: synchronous
+ * @callback: none
  * @since TizenRT v2.0
  */
-// API type: synchronous
-// callback: none
 wifi_manager_result_e wifi_manager_save_config(wifi_manager_ap_config_s *config);
 
 /**
@@ -400,20 +414,20 @@ wifi_manager_result_e wifi_manager_save_config(wifi_manager_ap_config_s *config)
  * @details @b #include <wifi_manager/wifi_manager.h>
  * @param[in] config The pointer of AP configuration information which will be filled
  * @return On success, WIFI_MANAGER_SUCCESS (i.e., 0) is returned. On failure, non-zero value is returned.
+ * @API type: synchronous
+ * @callback: none
  * @since TizenRT v2.0
  */
-// API type: synchronous
-// callback: none
 wifi_manager_result_e wifi_manager_get_config(wifi_manager_ap_config_s *config);
 
 /**
  * @brief Remove the AP configuration which was saved
  * @details @b #include <wifi_manager/wifi_manager.h>
  * @return On success, WIFI_MANAGER_SUCCESS (i.e., 0) is returned. On failure, non-zero value is returned.
+ * @API type: synchronous
+ * @callback: none
  * @since TizenRT v2.0
  */
-// API type: synchronous
-// callback: none
 wifi_manager_result_e wifi_manager_remove_config(void);
 
 /**
@@ -421,10 +435,10 @@ wifi_manager_result_e wifi_manager_remove_config(void);
  * @details @b #include <wifi_manager/wifi_manager.h>
  * @param[in] config The pointer of AP configuration infomation which will be filled
  * @return On success, WIFI_MANAGER_SUCCESS (i.e., 0) is returned. On failure, non-zero value is returned.
+ * @API type: synchronous
+ * @callback: none
  * @since TizenRT v2.0
  */
-// API type: synchronous
-// callback: none
 wifi_manager_result_e wifi_manager_get_connected_config(wifi_manager_ap_config_s *config);
 
 /**
@@ -432,10 +446,10 @@ wifi_manager_result_e wifi_manager_get_connected_config(wifi_manager_ap_config_s
  * @details @b #include <wifi_manager/wifi_manager.h>
  * @param[in] The pointer of WiFi Manager stats information which will be filled
  * @return On success, WIFI_MANAGER_SUCCESS (i.e., 0) is returned. On failure, non-zero value is returned.
+ * @API type: synchronous
+ * @callback: none
  * @since TizenRT v2.0
  */
-// API type: synchronous
-// callback: none
 wifi_manager_result_e wifi_manager_get_stats(wifi_manager_stats_s *stats);
 
 /**
@@ -443,14 +457,13 @@ wifi_manager_result_e wifi_manager_get_stats(wifi_manager_stats_s *stats);
  * @details @b #include <wifi_manager/wifi_manager.h>
  * @param[in] power save mode
  * @return On success, WIFI_MANAGER_SUCCESS (i.e., 0) is returned. On failure, non-zero value is returned.
+ * @API type: synchronous
+ * @callback: none
  * @since TizenRT v3.1
  */
-// API type: synchronous
-// callback: none
 wifi_manager_result_e wifi_manager_set_powermode(wifi_manager_powermode_e mode);
 #ifdef __cplusplus
 }
-#endif
 #endif
 /**
  *@}

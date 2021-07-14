@@ -137,6 +137,12 @@ trwifi_result_e vwifi_handle_deinit(void *req)
 trwifi_result_e vwifi_handle_scanap(void *req)
 {
 	VWIFI_ENTRY;
+	struct vwifi_req *vreq = (struct vwifi_req *)req;
+	trwifi_scan_config_s *config = (trwifi_scan_config_s *)(vreq->arg);
+	if (config) {
+		vdvdbg("ssid length %d\n", config->ssid_length);
+		vdvdbg("channel %d\n", config->channel);
+	}
 	_check_pending_event();
 	return g_vdev_ops_result;
 }
