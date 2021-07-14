@@ -3,8 +3,8 @@
 # see kconfig-language at https://www.kernel.org/doc/Documentation/kbuild/kconfig-language.txt
 #
 
-config EXAMPLES_STDK_SMART_LAMP
-	bool "STDK smart_lamp example"
+config EXAMPLES_STDK_SMART_SWITCH
+	bool "STDK smart_switch example"
 	default n
 	depends on STDK_IOT_CORE
 	---help---

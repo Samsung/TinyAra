@@ -1,6 +1,6 @@
 /* ***************************************************************************
  *
- * Copyright 2019 Samsung Electronics All Rights Reserved.
+ * Copyright 2020 Samsung Electronics All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include "device_control.h"
-#include <iotbus/iotbus_gpio.h>
+#include <iotbus/iotbus_error.h>
 #include "iot_os_util.h"
 #include <sys/types.h>
 #include <tinyara/clock.h>
@@ -34,7 +34,9 @@ int gpio_set_level(int port, int value)
 	value = (value == 0) ? NOTIFICATION_LED_GPIO_OFF : NOTIFICATION_LED_GPIO_ON;
 
 	iotbus_gpio_context_h ibctx = iotbus_gpio_open(port);
-	iotbus_gpio_write(ibctx, value);
+	if (iotbus_gpio_write(ibctx, value) != IOTBUS_ERROR_NONE) {
+		printf("error: gpio write failed, ibctx 0x%x\n", ibctx);
+	}
 	iotbus_gpio_close(ibctx);
 	return OK;
 }
@@ -46,58 +48,6 @@ static int gpio_get_level(int port)
 	result = iotbus_gpio_read(ibctx);
 	iotbus_gpio_close(ibctx);
 	return result;
-}
-
-static float calculate_rgb(float v1, float v2, float vh)
-{
-	if (vh < 0) {
-		vh += 1;
-	}
-	if (vh > 1) {
-		vh -= 1;
-	}
-
-	if ((6 * vh) < 1) {
-		return (v1 + (v2 - v1) * 6 * vh);
-	}
-	
-	if ((2 * vh) < 1) {
-		return v2;
-	}
-
-	if ((3 * vh) < 2) {
-		return (v1 + (v2 - v1) * ((2.0f / 3) - vh) * 6);
-	}
-	
-	return v1;
-}
-
-/* SmartThings manage color by using Hue-Saturation format,
-   If you use LED by using RGB color format, you need to change color format */
-void update_rgb_from_hsl(double hue, double saturation, int level,
-		int *red, int *green, int *blue)
-{
-	if (saturation == 0) {
-		*red = *green = *blue = 255;
-		return;
-	}
-
-	float v1, v2;
-	float h = ((float) hue) / 100;
-	float s = ((float) saturation) / 100;
-	float l = ((float) level) / 100;
-
-	if (l < 0.5) {
-		v2 = l * (1 + s);
-	} else {
-		v2 = l + s - l * s;
-	}
-
-	v1 = 2 * l - v2;
-
-	*red   = (int)(255 * calculate_rgb(v1, v2, h + (1.0f / 3)));
-	*green = (int)(255 * calculate_rgb(v1, v2, h));
-	*blue  = (int)(255 * calculate_rgb(v1, v2, h - (1.0f / 3)));
 }
 
 void button_isr_handler(void *arg)
@@ -220,21 +170,12 @@ void gpio_init(void)
 	iotbus_gpio_set_direction(n_handle, GPIO_DIRECTION_OUT);
 	iotbus_gpio_close(n_handle);
 
-	n_handle = iotbus_gpio_open(GPIO_OUTPUT_COLORLED_R);
+	n_handle = iotbus_gpio_open(GPIO_OUTPUT_MAINLED);
 	iotbus_gpio_set_direction(n_handle, GPIO_DIRECTION_OUT);
-	iotbus_gpio_close(n_handle);
-
-	n_handle = iotbus_gpio_open(GPIO_OUTPUT_COLORLED_G);
-	iotbus_gpio_set_direction(n_handle, GPIO_DIRECTION_OUT);
-	iotbus_gpio_close(n_handle);
-
-	n_handle = iotbus_gpio_open(GPIO_OUTPUT_COLORLED_B);
-	iotbus_gpio_set_direction(n_handle, GPIO_DIRECTION_OUT);
-	iotbus_gpio_close(n_handle);
+	iotbus_gpio_close(n_handle); 
 
 	gpio_set_level(GPIO_OUTPUT_NOTIFICATION_LED, NOTIFICATION_LED_GPIO_ON);
-	gpio_set_level(GPIO_OUTPUT_COLORLED_R, 0);
-	gpio_set_level(GPIO_OUTPUT_COLORLED_G, 0);
-	gpio_set_level(GPIO_OUTPUT_COLORLED_B, 0);
+	gpio_set_level(GPIO_OUTPUT_MAINLED, 0);
+
 	printf("gpio_init end\n");
 }

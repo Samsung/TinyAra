@@ -1,6 +1,6 @@
 ###########################################################################
 #
-# Copyright 2019 Samsung Electronics All Rights Reserved.
+# Copyright 2020 Samsung Electronics All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -54,13 +54,13 @@
 include $(APPDIR)/Make.defs
 
 
-APPNAME = smart_lamp
+APPNAME = smart_switch
 FUNCNAME = $(APPNAME)_main
 THREADEXEC = TASH_EXECMD_ASYNC
 
 STDK_DIR = $(TOPDIR)/../external/stdk
 STDK_SRC_DIR = $(STDK_DIR)/st-device-sdk-c/src
-ST_APP_PATH=$(TOPDIR)/../apps/examples/stdk_smart_lamp
+ST_APP_PATH=$(TOPDIR)/../apps/examples/stdk_smart_switch
 DEVICE_JSON_FILE=$(ST_APP_PATH)/device_info.json
 DEVICE_HEADER_FILE=$(ST_APP_PATH)/device_info.h
 DEVICE_HEADER_BACKUP_FILE=$(DEVICE_HEADER_FILE).bak
@@ -76,7 +76,7 @@ CFLAGS+=-I$(STDK_SRC_DIR)/port/os/tizenrt
 
 ASRCS =
 CSRCS =
-MAINSRC = smart_lamp.c device_control.c
+MAINSRC = smart_switch.c device_control.c
 
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 COBJS = $(CSRCS:.c=$(OBJEXT))
@@ -105,7 +105,7 @@ else
   INSTALL_DIR = $(BIN_DIR)
 endif
 
-CONFIG_EXAMPLES_PROGNAME ?= stdk_smart_lamp$(EXEEXT)
+CONFIG_EXAMPLES_PROGNAME ?= stdk_smart_switch$(EXEEXT)
 PROGNAME = $(CONFIG_EXAMPLES_PROGNAME)
 
 ROOTDEPPATH = --dep-path .
@@ -140,7 +140,7 @@ install:
 
 endif
 
-ifeq ($(CONFIG_BUILTIN_APPS)$(CONFIG_EXAMPLES_STDK_SMART_LAMP),yy)
+ifeq ($(CONFIG_BUILTIN_APPS)$(CONFIG_EXAMPLES_STDK_SMART_SWITCH),yy)
 $(BUILTIN_REGISTRY)$(DELIM)$(FUNCNAME).bdat: $(DEPCONFIG) Makefile
 	$(Q) $(call REGISTER,$(APPNAME),$(FUNCNAME),$(THREADEXEC),$(PRIORITY),$(STACKSIZE))
 
