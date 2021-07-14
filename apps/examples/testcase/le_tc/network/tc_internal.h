@@ -34,6 +34,9 @@ int net_socket_main(void);
 #ifdef CONFIG_TC_NET_PBUF
 int net_pbuf_main(void);
 #endif
+#ifdef CONFIG_TC_NET_POLL
+int net_poll_main(void);
+#endif
 #ifdef CONFIG_TC_NET_GETSOCKOPT
 void net_getsockopt_main(void);
 #endif

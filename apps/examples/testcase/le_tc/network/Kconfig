@@ -17,6 +17,7 @@ config TC_NET_ALL
 	default n
 	select TC_NET_SOCKET
 	select TC_NET_PBUF
+	select TC_NET_POLL if !DISABLE_POLL
 	select TC_NET_SETSOCKOPT
 	select TC_NET_CONNECT
 	select TC_NET_CLOSE
@@ -54,6 +55,11 @@ config TC_NET_PBUF
 	bool "pbuf() api "
 	default n
 	select DRIVERS_OS_API_TEST
+
+config TC_NET_POLL
+	bool "poll() api"
+	default n
+	depends on !DISABLE_POLL
 
 config TC_NET_SETSOCKOPT
 	bool "setsockopt() api"

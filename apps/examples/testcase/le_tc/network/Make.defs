@@ -59,6 +59,9 @@ endif
 ifeq ($(CONFIG_TC_NET_PBUF),y)
 CSRCS += tc_net_pbuf.c
 endif
+ifeq ($(CONFIG_TC_NET_POLL),y)
+CSRCS += tc_net_poll.c
+endif
 ifeq ($(CONFIG_TC_NET_SETSOCKOPT),y)
 CSRCS += tc_net_setsockopt.c
 endif
