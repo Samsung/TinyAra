@@ -1167,6 +1167,8 @@ int smartfs_finddirentry(struct smartfs_mountpt_s *fs, struct smartfs_entry_s *d
 				if (ret < 0) {
 					goto errout;
 				}
+				/* If IOCTL returns byte count successfully, re-assign ret = -ENOENT to continue */
+				ret = -ENOENT;
 
 				/* Point to next sector in chain */
 
@@ -1240,6 +1242,8 @@ int smartfs_finddirentry(struct smartfs_mountpt_s *fs, struct smartfs_entry_s *d
 										fdbg("Error in sector chain at %d, ret : %d\n", readwrite.logsector, ret);
 										break;
 									}
+									/* If IOCTL returns byte count successfully, re-assign ret = -ENOENT to continue */
+									ret = -ENOENT;
 #ifdef CONFIG_SMARTFS_DYNAMIC_HEADER
 									if (SMARTFS_NEXTSECTOR(header) == SMARTFS_ERASEDSTATE_16BIT) {
 
@@ -1251,6 +1255,9 @@ int smartfs_finddirentry(struct smartfs_mountpt_s *fs, struct smartfs_entry_s *d
 											fdbg("Error reading sector %d header, ret : %d\n", readwrite.logsector, ret);
 											break;
 										}
+										/* If IOCTL returns byte count successfully, re-assign ret = -ENOENT to continue */
+										ret = -ENOENT;
+
 										used_value = get_leftover_used_byte_count((uint8_t *)readwrite.buffer, get_used_byte_count((uint8_t *)header->used));
 										direntry->datalen += used_value;
 									} else {
