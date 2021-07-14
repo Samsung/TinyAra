@@ -231,8 +231,16 @@ static int smartfs_open(FAR struct file *filep, const char *relpath, int oflags,
 
 		if (sf->entry.flags & SMARTFS_DIRENT_TYPE_DIR) {
 			/* Can't open a dir as a file! */
-
+			fdbg("Cannot open %s directory as a file\n", relpath);
 			ret = -EISDIR;
+			goto errout_with_buffer;
+		}
+
+		/* If the relpath ends with character '/' but directory entry is not a directory as checked above, report an error */
+
+		if (relpath[strlen(relpath) - 1] == '/') {
+			fdbg("%s is not a directory\n", relpath);
+			ret = -ENOTDIR;
 			goto errout_with_buffer;
 		}
 
@@ -1375,7 +1383,15 @@ static int smartfs_unlink(struct inode *mountpt, const char *relpath)
 		/* The name exists -- validate it is a file, not a dir */
 
 		if ((entry.flags & SMARTFS_DIRENT_TYPE) == SMARTFS_DIRENT_TYPE_DIR) {
+			fdbg("%s is a directory\n", relpath);
 			ret = -EISDIR;
+			goto errout_with_semaphore;
+		}
+
+		/* If the path does not represent a directory but the "relpath" string ends in '/', report an error */
+		if (relpath[strlen(relpath) - 1] == '/') {
+			fdbg("%s is not a directory\n", relpath);
+			ret = -ENOTDIR;
 			goto errout_with_semaphore;
 		}
 
@@ -1585,6 +1601,13 @@ int smartfs_rename(struct inode *mountpt, const char *oldrelpath, const char *ne
 	ret = smartfs_finddirentry(fs, &oldentry, oldrelpath);
 	if (ret != OK) {
 		fdbg("Old entry doesn't exist\n");
+		goto errout_with_semaphore;
+	}
+
+	/* If the relpath ends in '/' but the entry is not a directory, report an error */
+	if ((oldrelpath[strlen(oldrelpath) - 1] == '/') && ((oldentry.flags & SMARTFS_DIRENT_TYPE) == SMARTFS_DIRENT_TYPE_FILE)) {
+		fdbg("%s is not a directory\n", oldrelpath);
+		ret = -ENOTDIR;
 		goto errout_with_semaphore;
 	}
 

@@ -1053,6 +1053,7 @@ int smartfs_unmount(struct smartfs_mountpt_s *fs)
 int smartfs_finddirentry(struct smartfs_mountpt_s *fs, struct smartfs_entry_s *direntry, const char *relpath)
 {
 	int ret = -ENOENT;
+	int tmp;
 	const char *segment;
 	const char *ptr;
 	uint16_t seglen;
@@ -1108,6 +1109,14 @@ int smartfs_finddirentry(struct smartfs_mountpt_s *fs, struct smartfs_entry_s *d
 			seglen++;
 			ptr++;
 		}
+
+		/* Paths like "/mnt/test//file1" should be treated the same as "/mnt/test/file1" */
+		if (*ptr != '\0') {
+			while (*(ptr + 1) == '/') {
+				ptr++;
+			}
+		}
+
 		/* Perform a check to avoid bufer overflow */
 		if (seglen >= SMARTFS_MAX_WORKBUFFER_LEN) {
 			ret = -ENAMETOOLONG;
@@ -1163,8 +1172,8 @@ int smartfs_finddirentry(struct smartfs_mountpt_s *fs, struct smartfs_entry_s *d
 				/* Read the next directory in the chain */
 
 				smartfs_setbuffer(&readwrite, dirsector, 0, fs->fs_llformat.availbytes, (uint8_t *)fs->fs_rwbuffer);
-				ret = FS_IOCTL(fs, BIOC_READSECT, (unsigned long)&readwrite);
-				if (ret < 0) {
+				tmp = FS_IOCTL(fs, BIOC_READSECT, (unsigned long)&readwrite);
+				if (tmp < 0) {
 					goto errout;
 				}
 
@@ -1193,13 +1202,13 @@ int smartfs_finddirentry(struct smartfs_mountpt_s *fs, struct smartfs_entry_s *d
 					/* Test if the name matches */
 
 					if (strncmp(entry->name, fs->fs_workbuffer, fs->fs_llformat.namesize) == 0) {
-						/* We found it!  If this is the last segment entry,
-						 * then report the entry.  If it isn't the last
-						 * entry, then validate it is a directory entry and
+						/* We found it!  If this is the last segment entry, then report the entry
+						 * If this segment is followed only by and extra '/' character in the end,
+						 * still report the entry. Otherwise, validate it is a directory entry and
 						 * open it and continue searching.
 						 */
 
-						if (*ptr == '\0') {
+						if (*ptr == '\0' || (*ptr == '/' && *(ptr + 1) == '\0')) {
 							/* We are at the last segment.  Report the entry */
 
 							/* Fill in the entry */
@@ -1235,8 +1244,8 @@ int smartfs_finddirentry(struct smartfs_mountpt_s *fs, struct smartfs_entry_s *d
 									/* Read the next sector of the file */
 
 									smartfs_setbuffer(&readwrite, dirsector, 0, sizeof(struct smartfs_chain_header_s), (uint8_t *)fs->fs_rwbuffer);
-									ret = FS_IOCTL(fs, BIOC_READSECT, (unsigned long)&readwrite);
-									if (ret < 0) {
+									tmp = FS_IOCTL(fs, BIOC_READSECT, (unsigned long)&readwrite);
+									if (tmp < 0) {
 										fdbg("Error in sector chain at %d, ret : %d\n", readwrite.logsector, ret);
 										break;
 									}
@@ -1246,8 +1255,8 @@ int smartfs_finddirentry(struct smartfs_mountpt_s *fs, struct smartfs_entry_s *d
 										readwrite.count = fs->fs_llformat.availbytes;
 										readwrite.buffer = (uint8_t *)fs->fs_chunk_buffer;
 
-										ret = FS_IOCTL(fs, BIOC_READSECT, (unsigned long)&readwrite);
-										if (ret < 0) {
+										tmp = FS_IOCTL(fs, BIOC_READSECT, (unsigned long)&readwrite);
+										if (tmp < 0) {
 											fdbg("Error reading sector %d header, ret : %d\n", readwrite.logsector, ret);
 											break;
 										}
@@ -1334,7 +1343,7 @@ int smartfs_finddirentry(struct smartfs_mountpt_s *fs, struct smartfs_entry_s *d
 			 * segment, then report the parent directory sector.
 			 */
 
-			if (*ptr == '\0') {
+			if (*ptr == '\0' || (*ptr == '/' && *(ptr + 1) == '\0')) {
 				direntry->dsector = dirstack[depth];
 				strncpy(direntry->name, segment, seglen);
 			} else {

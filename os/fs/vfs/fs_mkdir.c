@@ -148,7 +148,7 @@ int mkdir(const char *pathname, mode_t mode)
 
 		while (ptr != NULL && *ptr != '\0') {
 			/* Search a path of parent directory */
-			if (*ptr == '/') {
+			if (*ptr == '/' && *(ptr + 1) != '\0') {
 				index = len;
 			}
 			len++;
