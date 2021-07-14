@@ -1,0 +1,12 @@
+#
+# For a description of the syntax of this configuration file,
+# see kconfig-language at https://www.kernel.org/doc/Documentation/kbuild/kconfig-language.txt
+#
+
+config EXAMPLES_NET_LOCAL
+	bool "Unix Domain Socket example"
+	default n
+
+config USER_ENTRYPOINT
+	string
+	default "net_local_main" if ENTRY_NET_LOCAL

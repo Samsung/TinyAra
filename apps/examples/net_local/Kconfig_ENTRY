@@ -1,0 +1,3 @@
+config ENTRY_NET_LOCAL
+	bool "Unix Domain Socket example"
+	depends on EXAMPLES_NET_LOCAL
