@@ -58,7 +58,9 @@
 
 #include <unistd.h>
 #include <errno.h>
+#include <string.h>
 #include <tinyara/fs/fs.h>
+#include <tinyara/kmalloc.h>
 
 #include "inode/inode.h"
 
@@ -111,12 +113,18 @@ int unlink(FAR const char *pathname)
 {
 	FAR struct inode *inode;
 	const char *relpath = NULL;
+	const char *norm_path = NULL;
+	char *tmp = NULL;
 	int errcode;
 	int ret;
 
 	/* Get an inode for this file */
 
-	inode = inode_find(pathname, &relpath);
+	tmp = (char *)kmm_malloc(strlen(pathname));
+	normalize_path(pathname, &tmp);
+	norm_path = tmp;
+
+	inode = inode_find(norm_path, &relpath);
 	if (!inode) {
 		/* There is no inode that includes in this path */
 
@@ -221,6 +229,7 @@ int unlink(FAR const char *pathname)
 errout_with_inode:
 	inode_release(inode);
 errout:
+	kmm_free(tmp);
 	set_errno(errcode);
 	return ERROR;
 }

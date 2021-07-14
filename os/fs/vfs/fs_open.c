@@ -60,6 +60,7 @@
 #include <fcntl.h>
 #include <sched.h>
 #include <errno.h>
+#include <string.h>
 #include <assert.h>
 #ifdef CONFIG_FILE_MODE
 #include <stdarg.h>
@@ -67,6 +68,7 @@
 
 #include <tinyara/cancelpt.h>
 #include <tinyara/fs/fs.h>
+#include <tinyara/kmalloc.h>
 
 #include "inode/inode.h"
 #include "driver/block/driver.h"
@@ -113,6 +115,8 @@ int vopen(FAR const char *path, int oflags, va_list ap)
 	FAR struct file *filep;
 	FAR struct inode *inode;
 	FAR const char *relpath = NULL;
+	FAR const char *norm_path = NULL;
+	FAR char *tmp = NULL;
 #if defined(CONFIG_FILE_MODE) || !defined(CONFIG_DISABLE_MOUNTPOINT)
 	mode_t mode = 0666;
 #endif
@@ -137,7 +141,15 @@ int vopen(FAR const char *path, int oflags, va_list ap)
 
 	/* Get an inode for this file */
 
-	inode = inode_find(path, &relpath);
+	if (strncmp(path, "/", 1) != 0) {
+		tmp = (char *)kmm_malloc(strlen(path));
+		normalize_path(path, &tmp);
+		norm_path = tmp;
+
+		inode = inode_find(norm_path, &relpath);
+	} else {
+		inode = inode_find(path, &relpath);
+	}
 	if (!inode) {
 		/* "O_CREAT is not set and the named file does not exist.  Or, a
 		 * directory component in pathname does not exist or is a dangling
@@ -169,6 +181,7 @@ int vopen(FAR const char *path, int oflags, va_list ap)
 			ret = fd;
 			goto errout;
 		}
+		kmm_free(tmp);
 
 		return fd;
 	} else
@@ -239,6 +252,7 @@ errout_with_fd:
 errout_with_inode:
 	inode_release(inode);
 errout:
+	kmm_free(tmp);
 	return ret;
 }
 

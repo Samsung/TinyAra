@@ -1199,7 +1199,7 @@ int smartfs_finddirentry(struct smartfs_mountpt_s *fs, struct smartfs_entry_s *d
 						 * open it and continue searching.
 						 */
 
-						if (*ptr == '\0') {
+						if (*ptr == '\0' || (*ptr == '/' && *(ptr + 1) == '\0')) {
 							/* We are at the last segment.  Report the entry */
 
 							/* Fill in the entry */
@@ -1334,7 +1334,7 @@ int smartfs_finddirentry(struct smartfs_mountpt_s *fs, struct smartfs_entry_s *d
 			 * segment, then report the parent directory sector.
 			 */
 
-			if (*ptr == '\0') {
+			if (*ptr == '\0' || (*ptr == '/' && *(ptr + 1) == '\0')) {
 				direntry->dsector = dirstack[depth];
 				strncpy(direntry->name, segment, seglen);
 			} else {

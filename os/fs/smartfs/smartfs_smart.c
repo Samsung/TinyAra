@@ -231,8 +231,14 @@ static int smartfs_open(FAR struct file *filep, const char *relpath, int oflags,
 
 		if (sf->entry.flags & SMARTFS_DIRENT_TYPE_DIR) {
 			/* Can't open a dir as a file! */
-
 			ret = -EISDIR;
+			goto errout_with_buffer;
+		}
+
+		/* If the relpath ends with character '/' but directory entry is not a directory as checked above, report an error */
+
+		if (relpath[strlen(relpath) - 1] == '/') {
+			ret = -ENOTDIR;
 			goto errout_with_buffer;
 		}
 
@@ -1379,6 +1385,12 @@ static int smartfs_unlink(struct inode *mountpt, const char *relpath)
 			goto errout_with_semaphore;
 		}
 
+		/* If the path does not represent a directory but the "relpath" string ends in '/', report an error */
+		if (relpath[strlen(relpath) - 1] == '/') {
+			ret = -ENOTDIR;
+			goto errout_with_semaphore;
+		}
+
 		/* TODO:  Need to check permissions?  */
 
 		/* Okay, we are clear to delete the file.  Use the deleteentry routine. */
@@ -1585,6 +1597,12 @@ int smartfs_rename(struct inode *mountpt, const char *oldrelpath, const char *ne
 	ret = smartfs_finddirentry(fs, &oldentry, oldrelpath);
 	if (ret != OK) {
 		fdbg("Old entry doesn't exist\n");
+		goto errout_with_semaphore;
+	}
+
+	/* If the relpath ends in '/' but the entry is not a directory, report an error */
+	if ((oldrelpath[strlen(oldrelpath) - 1] == '/') && ((oldentry.flags & SMARTFS_DIRENT_TYPE) == SMARTFS_DIRENT_TYPE_FILE)) {
+		ret = -ENOTDIR;
 		goto errout_with_semaphore;
 	}
 

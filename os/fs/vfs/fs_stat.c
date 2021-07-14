@@ -60,6 +60,7 @@
 #include <string.h>
 #include <sched.h>
 #include <errno.h>
+#include <tinyara/kmalloc.h>
 
 #include "inode/inode.h"
 
@@ -104,6 +105,8 @@ int stat(FAR const char *path, FAR struct stat *buf)
 {
 	FAR struct inode *inode;
 	const char *relpath = NULL;
+	const char *norm_path = NULL;
+	char *tmp = NULL;
 	int ret = OK;
 
 	/* Sanity checks */
@@ -126,7 +129,11 @@ int stat(FAR const char *path, FAR struct stat *buf)
 
 	/* Get an inode for this file */
 
-	inode = inode_find(path, &relpath);
+	tmp = (char *)kmm_malloc(strlen(path));
+	normalize_path(path, &tmp);
+	norm_path = tmp;
+
+	inode = inode_find(norm_path, &relpath);
 	if (!inode) {
 		/* This name does not refer to a psudeo-inode and there is no
 		 * mountpoint that includes in this path.
@@ -169,6 +176,7 @@ int stat(FAR const char *path, FAR struct stat *buf)
 	/* Successfully stat'ed the file */
 
 	inode_release(inode);
+	kmm_free(tmp);
 	return OK;
 
 	/* Failure conditions always set the errno appropriately */
@@ -177,6 +185,7 @@ errout_with_inode:
 	inode_release(inode);
 errout:
 	set_errno(ret);
+	kmm_free(tmp);
 	return ERROR;
 }
 

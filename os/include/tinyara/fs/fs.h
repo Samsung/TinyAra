@@ -1164,6 +1164,8 @@ ssize_t bchlib_write(FAR void *handle, FAR const char *buffer, size_t offset, si
 
 void pipe_initialize(void);
 
+void normalize_path(const char *path, char **ret_path);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

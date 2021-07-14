@@ -113,6 +113,8 @@ int mkdir(const char *pathname, mode_t mode)
 {
 	FAR struct inode *inode;
 	const char *relpath = NULL;
+	const char *norm_path = NULL;
+	char *tmp = NULL;
 	int errcode = 0;
 	int ret;
 #ifndef CONFIG_DISABLE_MOUNTPOINT
@@ -125,7 +127,11 @@ int mkdir(const char *pathname, mode_t mode)
 
 	/* Find the inode that includes this path */
 
-	inode = inode_find(pathname, &relpath);
+	tmp = (char *)kmm_malloc(strlen(pathname));
+	normalize_path(pathname, &tmp);
+	norm_path = tmp;
+
+	inode = inode_find(norm_path, &relpath);
 
 	if (inode) {
 		/* An inode was found that includes this path and possibly refers to a
@@ -148,7 +154,7 @@ int mkdir(const char *pathname, mode_t mode)
 
 		while (ptr != NULL && *ptr != '\0') {
 			/* Search a path of parent directory */
-			if (*ptr == '/') {
+			if (*ptr == '/' && *(ptr + 1) != '\0') {
 				index = len;
 			}
 			len++;
@@ -240,6 +246,7 @@ errout_with_inode:
 	inode_release(inode);
 errout:
 	set_errno(errcode);
+	kmm_free(tmp);
 	return ERROR;
 }
 

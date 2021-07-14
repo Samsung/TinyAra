@@ -1084,10 +1084,26 @@ static int tash_rm(int argc, char **args)
 {
 	char *fullpath;
 	int ret = OK;
+	struct stat st;
 
 	if (args[2]) {
 		fullpath = get_fullpath(args[2]);
 		if (strncmp(args[1], "-r", strlen(args[1])) == 0) {
+			/* The request is to delete an entire directory recursively
+			   Check if the entry requested is not a directory and report
+			 */
+			if (stat(fullpath, &st) < 0) {
+				FSCMD_OUTPUT("stat failed with %s, error = %d\n", fullpath, errno);
+				ret = -errno;
+				goto errout;
+			}
+
+			if (!S_ISDIR(st.st_mode)) {
+				FSCMD_OUTPUT("%s is not a directory\n", fullpath);
+				ret = -ENOTDIR;
+				goto errout;
+			}
+
 			ret = delete_entry(fullpath);
 		} else {
 			FSCMD_OUTPUT("Usage: rm [-r] [FILE/DIR]\n");
@@ -1097,15 +1113,14 @@ static int tash_rm(int argc, char **args)
 		ret = unlink(fullpath);
 		if (ret != OK) {
 			FSCMD_OUTPUT(CMD_FAILED, args[0], "unlink");
-			fscmd_free(fullpath);
-			return ret;
+			ret = -errno;
+			goto errout;
 		}
 		FSCMD_OUTPUT("%s deleted\n", fullpath);
 	}
 
-	if (fullpath) {
-		fscmd_free(fullpath);
-	}
+errout:
+	fscmd_free(fullpath);
 
 	return ret;
 }
