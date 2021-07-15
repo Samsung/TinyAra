@@ -46,7 +46,7 @@ static rtw_result_t rtw_send_event_to_worker(int event_cmd, char *buf, int buf_l
 			if(local_buf == NULL)
 				return RTW_NOMEM;
 			memcpy(local_buf, buf, buf_len);
-			//printf("\n!!!!!Allocate %p(%d) for evcmd %d\n", local_buf, buf_len, event_cmd);
+			//vdvdbg("\n!!!!!Allocate %p(%d) for evcmd %d\n", local_buf, buf_len, event_cmd);
 		}
 		message.buf = local_buf;
 		message.flags = flags;
@@ -55,7 +55,7 @@ static rtw_result_t rtw_send_event_to_worker(int event_cmd, char *buf, int buf_l
 		ret = rtw_push_to_xqueue(&wifi_worker_thread.event_queue, &message, 0);
 		if(ret != RTW_SUCCESS){
 			if(local_buf){
-				printf("\r\nrtw_send_event_to_worker: enqueue cmd %d failed and free %p(%d)\n", event_cmd, local_buf, buf_len);
+				vdvdbg("\r\nrtw_send_event_to_worker: enqueue cmd %d failed and free %p(%d)\n", event_cmd, local_buf, buf_len);
 				vPortFree(local_buf);
 			}
 			break;
@@ -95,7 +95,7 @@ void wifi_indication( rtw_event_indicate_t event, char *buf, int buf_len, int fl
 	{
 		case WIFI_EVENT_DISCONNECT:
 #if(WIFI_INDICATE_MSG==1)			
-			printf("\n\r %s():Disconnection indication received", __FUNCTION__);
+			vdvdbg("\n\r %s():Disconnection indication received", __FUNCTION__);
 #endif
 			break;
 		case WIFI_EVENT_CONNECT:
@@ -107,7 +107,7 @@ void wifi_indication( rtw_event_indicate_t event, char *buf, int buf_len, int fl
 			// Sample: return mac address
 			if(buf != NULL && buf_len == 6)
 			{
-				printf("\n\r%s():Connect indication received: %02x:%02x:%02x:%02x:%02x:%02x", __FUNCTION__, 
+				vdvdbg("\n\r%s():Connect indication received: %02x:%02x:%02x:%02x:%02x:%02x", __FUNCTION__, 
 							buf[0],buf[1],buf[2],buf[3],buf[4],buf[5]);
 			}
 #endif
@@ -117,89 +117,95 @@ void wifi_indication( rtw_event_indicate_t event, char *buf, int buf_len, int fl
 			if(buf != NULL)			
 			{
 				if(buf_len == strlen(IW_EXT_STR_FOURWAY_DONE))
-					printf("\n\r%s():%s", __FUNCTION__, buf);
+					vdvdbg("\n\r%s():%s", __FUNCTION__, buf);
 			}
 #endif
 			break;
 		case WIFI_EVENT_SCAN_RESULT_REPORT:
 #if(WIFI_INDICATE_MSG==1)			
-			printf("\n\r%s(): WIFI_EVENT_SCAN_RESULT_REPORT\n", __func__);
+			vdvdbg("\n\r%s(): WIFI_EVENT_SCAN_RESULT_REPORT\n", __func__);
 #endif
 			break;
 		case WIFI_EVENT_SCAN_DONE:
 #if(WIFI_INDICATE_MSG==1)			
-			printf("\n\r%s(): WIFI_EVENT_SCAN_DONE\n", __func__);
+			vdvdbg("\n\r%s(): WIFI_EVENT_SCAN_DONE\n", __func__);
 #endif
 			break;
 		case WIFI_EVENT_RECONNECTION_FAIL:
 #if(WIFI_INDICATE_MSG==1)			
 			if(buf != NULL){
 				if(buf_len == strlen(IW_EXT_STR_RECONNECTION_FAIL))
-					printf("\n\r%s", buf);
+					vdvdbg("\n\r%s", buf);
 			}
 #endif
 			break;
 		case WIFI_EVENT_NO_NETWORK:
 #if(WIFI_INDICATE_MSG==1)			
-			printf("\n\r%s(): WIFI_EVENT_NO_NETWORK\n", __func__);
+			vdvdbg("\n\r%s(): WIFI_EVENT_NO_NETWORK\n", __func__);
 #endif
 			break;
 		case WIFI_EVENT_RX_MGNT:
 #if(WIFI_INDICATE_MSG==1)			
-			printf("\n\r%s(): WIFI_EVENT_RX_MGNT\n", __func__);
+			vdvdbg("\n\r%s(): WIFI_EVENT_RX_MGNT\n", __func__);
 #endif
 			break;
 #if CONFIG_ENABLE_P2P
 		case WIFI_EVENT_SEND_ACTION_DONE:
 #if(WIFI_INDICATE_MSG==1)			
-			printf("\n\r%s(): WIFI_EVENT_SEND_ACTION_DONE\n", __func__);
+			vdvdbg("\n\r%s(): WIFI_EVENT_SEND_ACTION_DONE\n", __func__);
 #endif
 			break;
 #endif //CONFIG_ENABLE_P2P
 		case WIFI_EVENT_STA_ASSOC:
 #if(WIFI_INDICATE_MSG==1)			
-			printf("\n\r%s(): WIFI_EVENT_STA_ASSOC\n", __func__);
+			vdvdbg("\n\r%s(): WIFI_EVENT_STA_ASSOC\n", __func__);
 #endif
 			break;
 		case WIFI_EVENT_STA_DISASSOC:
 #if(WIFI_INDICATE_MSG==1)			
-			printf("\n\r%s(): WIFI_EVENT_STA_DISASSOC\n", __func__);
+			vdvdbg("\n\r%s(): WIFI_EVENT_STA_DISASSOC\n", __func__);
 #endif
 			break;
 #ifdef CONFIG_WPS
 		case WIFI_EVENT_STA_WPS_START:
 #if(WIFI_INDICATE_MSG==1)
-			printf("\n\r%s(): WIFI_EVENT_STA_WPS_START\n", __func__);
+			vdvdbg("\n\r%s(): WIFI_EVENT_STA_WPS_START\n", __func__);
 #endif
 			break;
 		case WIFI_EVENT_WPS_FINISH:
 #if(WIFI_INDICATE_MSG==1)
-			printf("\n\r%s(): WIFI_EVENT_WPS_FINISH\n", __func__);
+			vdvdbg("\n\r%s(): WIFI_EVENT_WPS_FINISH\n", __func__);
 #endif
 			break;
 		case WIFI_EVENT_EAPOL_RECVD:
 #if(WIFI_INDICATE_MSG==1)
-			printf("\n\r%s(): WIFI_EVENT_EAPOL_RECVD\n", __func__);
+			vdvdbg("\n\r%s(): WIFI_EVENT_EAPOL_RECVD\n", __func__);
 #endif
 			break;
 #endif
 		case WIFI_EVENT_BEACON_AFTER_DHCP:
 #if(WIFI_INDICATE_MSG==1)
-			printf("\n\r%s(): WIFI_EVENT_BEACON_AFTER_DHCP\n", __func__);
+			vdvdbg("\n\r%s(): WIFI_EVENT_BEACON_AFTER_DHCP\n", __func__);
 #endif
 			break;
 		case WIFI_EVENT_IP_CHANGED:
 #if(WIFI_INDICATE_MSG==1)
-			printf("\n\r%s(): WIFI_EVENT_IP_CHANNGED\n", __func__);
+			vdvdbg("\n\r%s(): WIFI_EVENT_IP_CHANNGED\n", __func__);
 #endif
 			break;
 		case WIFI_EVENT_ICV_ERROR:
 #if(WIFI_INDICATE_MSG==1)
-			printf("\n\r%s(): WIFI_EVENT_ICV_ERROR\n", __func__);
+			vdvdbg("\n\r%s(): WIFI_EVENT_ICV_ERROR\n", __func__);
 #endif
+			break;
 		case WIFI_EVENT_CHALLENGE_FAIL:
 #if(WIFI_INDICATE_MSG==1)
-			printf("\n\r%s(): WIFI_EVENT_CHALLENGE_FAIL\n", __func__);
+			vdvdbg("\n\r%s(): WIFI_EVENT_CHALLENGE_FAIL\n", __func__);
+#endif
+			break;
+		case WIFI_EVENT_STA_FOURWAY_HANDSHAKE_DONE:
+#if(WIFI_INDICATE_MSG==1)
+			vdvdbg("\n\r%s(): WIFI_EVENT_STA_FOURWAY_HANDSHAKE_DONE\n", __func__);
 #endif
 			break;
 	}

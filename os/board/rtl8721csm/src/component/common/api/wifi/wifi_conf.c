@@ -1596,8 +1596,8 @@ static void wifi_ap_sta_assoc_hdl( char* buf, int buf_len, int flags, void* user
 #if defined(CONFIG_PLATFORM_TIZENRT_OS)
 	rtk_reason_t reason;
 	memset(&reason, 0, sizeof(rtk_reason_t));
-	if (strlen(buf) >= 17) {			  // bssid is a 17 character string
-		memcpy(&(reason.bssid), buf, 17); // Exclude null-termination
+	if (buf != NULL) {
+		nvdbg("STA MAC address is " MAC_FMT "\n", MAC_ARG(buf));
 	}
 
 	if (g_link_up) {
@@ -1617,8 +1617,10 @@ static void wifi_ap_sta_disassoc_hdl( char* buf, int buf_len, int flags, void* u
 #if defined(CONFIG_PLATFORM_TIZENRT_OS)
 	rtk_reason_t reason;
 	memset(&reason, 0, sizeof(rtk_reason_t));
-	if (strlen(buf) >= 17) { // bssid is a 17 character string
-		memcpy(&(reason.bssid), buf, 17);
+	if (buf != NULL) { //mac address len 6; reason code len 2
+		nvdbg("STA MAC address is " MAC_FMT "\n", MAC_ARG(buf));
+		memcpy(&(reason.reason_code), buf + MAC_ADDR_LEN, DISASSOC_REASON_CODE_LEN); //refer to Reason codes (IEEE 802.11-2007, 7.3.1.7, Table 7-22) in ieee802_11_defs.h
+		nvdbg("STA disassoc reason code is %d\n", reason.reason_code);
 	}
 	if (g_link_down) {
 		nvdbg("RTK_API rtk_handle_disconnect send link_down\n");
@@ -1626,6 +1628,29 @@ static void wifi_ap_sta_disassoc_hdl( char* buf, int buf_len, int flags, void* u
 	}
 #endif
 }
+
+static void wifi_ap_sta_handshake_done_hdl( char* buf, int buf_len, int flags, void* userdata)
+{
+	/* To avoid gcc warnings */
+	( void ) buf;
+	( void ) buf_len;
+	( void ) flags;
+	( void ) userdata;
+	//USER TODO
+#if defined(CONFIG_PLATFORM_TIZENRT_OS)
+	rtk_reason_t reason;
+	memset(&reason, 0, sizeof(rtk_reason_t));
+	if (buf != NULL) {
+		nvdbg("STA MAC address is " MAC_FMT "\n", MAC_ARG(buf));
+	}
+
+	if (g_link_up) {
+		nvdbg("RTK_API rtk_link_event_handler send link_up\n");
+		g_link_up(&reason);
+	}
+#endif
+}
+
 
 int wifi_get_last_error(void)
 {
@@ -1674,7 +1699,11 @@ int wifi_start_ap(
 	if(is_promisc_enabled())
 		promisc_set(0, NULL, 0);
 
-	wifi_reg_event_handler(WIFI_EVENT_STA_ASSOC, wifi_ap_sta_assoc_hdl, NULL);
+	if ((security_type == RTW_SECURITY_OPEN) || (security_type == RTW_SECURITY_WEP_PSK)) {
+		wifi_reg_event_handler(WIFI_EVENT_STA_ASSOC, wifi_ap_sta_assoc_hdl, NULL);
+	} else {
+		wifi_reg_event_handler(WIFI_EVENT_STA_FOURWAY_HANDSHAKE_DONE, wifi_ap_sta_handshake_done_hdl, NULL);
+	}
 	wifi_reg_event_handler(WIFI_EVENT_STA_DISASSOC, wifi_ap_sta_disassoc_hdl, NULL);
 	
 	ret = wext_set_mode(ifname, IW_MODE_MASTER);
@@ -1750,7 +1779,11 @@ int wifi_start_ap_with_hidden_ssid(
 	if(is_promisc_enabled())
 		promisc_set(0, NULL, 0);
 
-	wifi_reg_event_handler(WIFI_EVENT_STA_ASSOC, wifi_ap_sta_assoc_hdl, NULL);
+	if ((security_type == RTW_SECURITY_OPEN) || (security_type == RTW_SECURITY_WEP_PSK)) {
+		wifi_reg_event_handler(WIFI_EVENT_STA_ASSOC, wifi_ap_sta_assoc_hdl, NULL);
+	} else {
+		wifi_reg_event_handler(WIFI_EVENT_STA_FOURWAY_HANDSHAKE_DONE, wifi_ap_sta_handshake_done_hdl, NULL);
+	}
 	wifi_reg_event_handler(WIFI_EVENT_STA_DISASSOC, wifi_ap_sta_disassoc_hdl, NULL);
 
 	ret = wext_set_mode(ifname, IW_MODE_MASTER);

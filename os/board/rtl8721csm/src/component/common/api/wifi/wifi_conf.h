@@ -75,8 +75,9 @@
  ******************************************************/
 #define SCAN_LONGEST_WAIT_TIME  (4500)
 
-
+#define MAC_ADDR_LEN 6
 #define MAC_FMT "%02x:%02x:%02x:%02x:%02x:%02x"
+#define DISASSOC_REASON_CODE_LEN 2
 
 #define PSCAN_ENABLE 0x01      //enable for partial channel scan
 #define PSCAN_FAST_SURVEY 0x02 //set to select scan time to FAST_SURVEY_TO, otherwise SURVEY_TO

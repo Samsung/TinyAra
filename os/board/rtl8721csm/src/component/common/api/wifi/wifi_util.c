@@ -1071,9 +1071,11 @@ void wext_wlan_indicate(unsigned int cmd, union iwreq_data *wrqu, char *extra)
 				else if(!memcmp(IW_EVT_STR_STA_ASSOC, extra, strlen(IW_EVT_STR_STA_ASSOC)))
 					wifi_indication(WIFI_EVENT_STA_ASSOC, wrqu->data.pointer, wrqu->data.length, 0);
 				else if(!memcmp(IW_EVT_STR_STA_DISASSOC, extra, strlen(IW_EVT_STR_STA_DISASSOC)))
-					wifi_indication(WIFI_EVENT_STA_DISASSOC, wrqu->addr.sa_data, sizeof(null_mac), 0);
+					wifi_indication(WIFI_EVENT_STA_DISASSOC, wrqu->addr.sa_data, sizeof(null_mac) + DISASSOC_REASON_CODE_LEN, 0);
 				else if(!memcmp(IW_EVT_STR_SEND_ACTION_DONE, extra, strlen(IW_EVT_STR_SEND_ACTION_DONE)))
 					wifi_indication(WIFI_EVENT_SEND_ACTION_DONE, NULL, 0, wrqu->data.flags);
+				else if(!memcmp(IW_EVT_STR_STA_FOURWAY_DONE, extra, strlen(IW_EVT_STR_STA_FOURWAY_DONE)))
+					wifi_indication(WIFI_EVENT_STA_FOURWAY_HANDSHAKE_DONE, wrqu->addr.sa_data, sizeof(null_mac), 0);
 #endif				
 			}
 			break;
@@ -1093,7 +1095,7 @@ void wext_wlan_indicate(unsigned int cmd, union iwreq_data *wrqu, char *extra)
 			break;
 		case IWEVEXPIRED:
 			if(wrqu->addr.sa_family == ARPHRD_ETHER)
-				wifi_indication(WIFI_EVENT_STA_DISASSOC, wrqu->addr.sa_data, sizeof(null_mac), 0);
+				wifi_indication(WIFI_EVENT_STA_DISASSOC, wrqu->addr.sa_data, sizeof(null_mac) + DISASSOC_REASON_CODE_LEN, 0);
 			break;
 #endif
 		default:
