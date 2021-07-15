@@ -31,6 +31,7 @@
 #include <pthread.h>
 #include <sys/ioctl.h>
 #include <poll.h>
+#include <tinyara/serial/tioctl.h>
 #include <iotbus/iotbus_error.h>
 #include <iotbus/iotbus_uart.h>
 
@@ -172,6 +173,69 @@ int iotbus_uart_stop(iotbus_uart_context_h hnd)
 	free(handle);
 	hnd->handle = NULL;
 	free(hnd);
+
+	return IOTBUS_ERROR_NONE;
+}
+
+int iotbus_uart_rxavailable(iotbus_uart_context_h hnd)
+{
+	int ret;
+	int fd;
+	struct _iotbus_uart_s *handle;
+
+	if (!hnd || !hnd->handle) {
+		return IOTBUS_ERROR_INVALID_PARAMETER;
+	}
+
+	handle = (struct _iotbus_uart_s *)hnd->handle;
+	fd = handle->fd;
+
+	ret = tccheckfifo(fd, TIOCS_AVAIL);
+	if (ret < 1) {
+		return IOTBUS_ERROR_QUEUE_EMPTY;
+	}
+
+	return IOTBUS_ERROR_NONE;
+}
+
+int iotbus_uart_txready(iotbus_uart_context_h hnd)
+{
+	int ret;
+	int fd;
+	struct _iotbus_uart_s *handle;
+
+	if (!hnd || !hnd->handle) {
+		return IOTBUS_ERROR_INVALID_PARAMETER;
+	}
+
+	handle = (struct _iotbus_uart_s *)hnd->handle;
+	fd = handle->fd;
+
+	ret = tccheckfifo(fd, TIOCS_READY);
+	if (ret < 1) {
+		return IOTBUS_ERROR_QUEUE_FULL;
+	}
+
+	return IOTBUS_ERROR_NONE;
+}
+
+int iotbus_uart_txempty(iotbus_uart_context_h hnd)
+{
+	int ret;
+	int fd;
+	struct _iotbus_uart_s *handle;
+
+	if (!hnd || !hnd->handle) {
+		return IOTBUS_ERROR_INVALID_PARAMETER;
+	}
+
+	handle = (struct _iotbus_uart_s *)hnd->handle;
+	fd = handle->fd;
+
+	ret = tccheckfifo(fd, TIOCS_EMPTY);
+	if (ret < 1) {
+		return IOTBUS_ERROR_QUEUE_NOT_EMPTY;
+	}
 
 	return IOTBUS_ERROR_NONE;
 }

@@ -774,6 +774,75 @@ static void itc_systemio_iotbus_uart_set_flow_mode_flush_write_read_p(void)
 	TC_SUCCESS_RESULT();
 }
 
+/**
+* @testcase         itc_systemio_iotbus_uart_rxavailable
+* @brief            To check if there is data in rx fifo.
+* @scenario         if data in rx fifo
+* @apicovered       iotbus_uart_rxavailable
+* @precondition     initializes uart_context
+* @postcondition    closes uart_context
+*/
+static void itc_systemio_iotbus_uart_rxavailable(void)
+{
+	int ret = IOTBUS_ERROR_NONE;
+	iotbus_uart_context_h h_uart = iotbus_uart_init(DEVPATH);
+	TC_ASSERT_NEQ("iotbus_uart_init", h_uart, NULL);
+
+	ret = iotbus_uart_rxavailable(h_uart);
+	TC_ASSERT_EQ_CLEANUP("iotbus_uart_rxavailable", ret, IOTBUS_ERROR_NONE, iotbus_uart_stop(h_uart));
+
+	ret = iotbus_uart_stop(h_uart);
+	TC_ASSERT_EQ("iotbus_uart_stop", ret, IOTBUS_ERROR_NONE);
+
+	TC_SUCCESS_RESULT();
+}
+
+/**
+* @testcase         itc_systemio_iotbus_uart_txready
+* @brief            To check if the transmit fifo is not full
+* @scenario         if transmit fifo is not full.
+* @apicovered       iotbus_uart_txready
+* @precondition     initializes uart_context
+* @postcondition    closes uart_context
+*/
+static void itc_systemio_iotbus_uart_txready(void)
+{
+	int ret = IOTBUS_ERROR_NONE;
+	iotbus_uart_context_h h_uart = iotbus_uart_init(DEVPATH);
+	TC_ASSERT_NEQ("iotbus_uart_init", h_uart, NULL);
+
+	ret = iotbus_uart_txready(h_uart);
+	TC_ASSERT_EQ_CLEANUP("iotbus_uart_txready", ret, IOTBUS_ERROR_NONE, iotbus_uart_stop(h_uart));
+
+	ret = iotbus_uart_stop(h_uart);
+	TC_ASSERT_EQ("iotbus_uart_stop", ret, IOTBUS_ERROR_NONE);
+
+	TC_SUCCESS_RESULT();
+}
+
+/**
+* @testcase         itc_systemio_iotbus_uart_txempty
+* @brief            To check if the transmit fifo is empty
+* @scenario         if transmit fifo is empty.
+* @apicovered       iotbus_uart_txempty
+* @precondition     initializes uart_context
+* @postcondition    closes uart_context
+*/
+static void itc_systemio_iotbus_uart_txempty(void)
+{
+	int ret = IOTBUS_ERROR_NONE;
+	iotbus_uart_context_h h_uart = iotbus_uart_init(DEVPATH);
+	TC_ASSERT_NEQ("iotbus_uart_init", h_uart, NULL);
+
+	ret = iotbus_uart_txempty(h_uart);
+	TC_ASSERT_EQ_CLEANUP("iotbus_uart_txempty", ret, IOTBUS_ERROR_NONE, iotbus_uart_stop(h_uart));
+
+	ret = iotbus_uart_stop(h_uart);
+	TC_ASSERT_EQ("iotbus_uart_stop", ret, IOTBUS_ERROR_NONE);
+
+	TC_SUCCESS_RESULT();
+}
+
 /****************************************************************************
  * Name: environ
  ****************************************************************************/
@@ -800,6 +869,10 @@ int itc_uart_main(void)
 	itc_systemio_iotbus_uart_set_mode_write_read_p();
 	itc_systemio_iotbus_uart_set_mode_flush_write_read_p();
 	itc_systemio_iotbus_uart_set_flow_mode_flush_write_read_p();
+	itc_systemio_iotbus_uart_rxavailable();
+	itc_systemio_iotbus_uart_txready();
+	itc_systemio_iotbus_uart_txempty();
+
 #endif
 
 	return 0;

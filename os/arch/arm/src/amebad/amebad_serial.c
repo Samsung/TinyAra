@@ -564,6 +564,15 @@ static int rtl8721d_up_ioctl(FAR struct uart_dev_s *dev, int cmd, unsigned long 
 		rtl8721d_up_rxint(dev, priv->rxint_enable);
 		break;
 
+	case TIOCS_AVAIL:
+		ret = rtl8721d_up_rxavailable(dev);
+		break;
+	case TIOCS_READY:
+		ret = rtl8721d_up_txready(dev);
+		break;
+	case TIOCS_EMPTY:
+		ret = rtl8721d_up_txempty(dev);
+		break;
 	default:
 		ret = -ENOTTY;
 		break;

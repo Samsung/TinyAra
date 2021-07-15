@@ -320,6 +320,10 @@ int tcflow(int fd, int action);
  */
 int tcflush(int fd, int cmd);
 /**
+  * check the operations on fifo.
+  */
+int tccheckfifo(int fd, int cmd);
+/**
  * @endcond
  */
 /* Get the parameters associated with the terminal */
