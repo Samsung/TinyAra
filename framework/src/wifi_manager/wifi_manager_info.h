@@ -29,7 +29,6 @@
 struct wifimgr_info_msg {
 	char *ssid;
 	char *softap_ssid;
-	char *mac_addr;
 	int rssi;
 	wifimgr_state_e state;
 };

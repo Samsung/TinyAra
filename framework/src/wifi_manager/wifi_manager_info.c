@@ -30,15 +30,13 @@
 struct _wifimgr_info {
 	char ssid[WIFIMGR_SSID_LEN + 1];             // SSID of Connected AP if mode is a station
 	char softap_ssid[WIFIMGR_SSID_LEN + 1];      // SoftAP SSID if mode is a soft ap
-	char mac_address[WIFIMGR_MACADDR_LEN];	   // MAC address of wifi interface
 	int rssi;                  // It is only used for a station mode
 	wifimgr_state_e state;
 	wifimgr_state_e prev_state;
 };
 typedef struct _wifimgr_info _wifimgr_info_s;
 
-static _wifimgr_info_s g_manager_info = {{0}, {0}, {0}, 0};
-
+static _wifimgr_info_s g_manager_info = {{0}, {0}, 0, WIFIMGR_NONE, WIFIMGR_NONE};
 
 int wifimgr_get_info(int flag, wifimgr_info_msg_s *info)
 {
@@ -50,10 +48,6 @@ int wifimgr_get_info(int flag, wifimgr_info_msg_s *info)
 	if ((flag & WIFIMGR_SOFTAP_SSID) != 0) {
 		strncpy(info->softap_ssid, g_manager_info.softap_ssid, WIFIMGR_SSID_LEN);
 		info->softap_ssid[WIFIMGR_SSID_LEN] = '\0';
-	}
-
-	if ((flag & WIFIMGR_MACADDR) != 0) {
-		memcpy(info->mac_addr, g_manager_info.mac_address, WIFIMGR_MACADDR_LEN);
 	}
 
 	if ((flag & WIFIMGR_RSSI) != 0) {
@@ -87,10 +81,6 @@ int wifimgr_set_info(int flag, wifimgr_info_msg_s *info)
 	if ((flag & WIFIMGR_SOFTAP_SSID) != 0) {
 		strncpy(g_manager_info.softap_ssid, info->softap_ssid, WIFIMGR_SSID_LEN);
 		g_manager_info.softap_ssid[WIFIMGR_SSID_LEN] = '\0';
-	}
-
-	if ((flag & WIFIMGR_MACADDR) != 0) {
-		memcpy(g_manager_info.mac_address, info->mac_addr, WIFIMGR_MACADDR_LEN);
 	}
 
 	if ((flag & WIFIMGR_RSSI) != 0) {
