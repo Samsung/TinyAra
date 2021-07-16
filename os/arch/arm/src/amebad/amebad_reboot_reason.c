@@ -88,6 +88,21 @@ static reboot_reason_code_t up_reboot_reason_get_hw_value(void)
 		else if ((boot_reason & BIT_BOOT_KM4WDG_RESET_HAPPEN) || (boot_reason & BIT_BOOT_WDG_RESET_HAPPEN)) {
 			return REBOOT_SYSTEM_WATCHDOG;
 		}
+
+		/* KM4 deep sleep handled by KM0 (KM4 sleep + KM0 tickless, KM4 deep sleep + KM0 deep sleep AON) */
+		else if (boot_reason & BIT_BOOT_DSLP_RESET_HAPPEN) {
+			return REBOOT_SYSTEM_DSLP_RESET;
+		}
+
+		/* KM4 or KM0 System reset */
+		else if ((boot_reason & BIT_BOOT_KM4SYS_RESET_HAPPEN) || (boot_reason & BIT_BOOT_SYS_RESET_HAPPEN)) {
+			return REBOOT_SYSTEM_SYS_RESET;
+		}
+
+		/* Brownout reset */
+		else if (boot_reason & BIT_BOOT_BOD_RESET_HAPPEN) {
+			return REBOOT_SYSTEM_BOD_RESET;
+		}
 	}
 
 	return REBOOT_UNKNOWN;
