@@ -25,23 +25,23 @@
 
 typedef enum {
 	/* [Reboot Reason Code]
-	 * System : 0 ~ 29,
-	 * Network : 30 ~ 59,
-	 * Common Service : 60 ~ 89,
-	 * App : 90 ~ 254
+	 * System : 50 ~ 79,
+	 * Network : 80 ~ 109,
+	 * Common Service : 110 ~ 139,
+	 * App : 140 ~ 254
 	 */
-	REBOOT_REASON_INITIALIZED          = 0,
-	REBOOT_SYSTEM_DATAABORT            = 1,	 /* Data abort */
-	REBOOT_SYSTEM_PREFETCHABORT        = 2,	 /* Prefetch abort */
-	REBOOT_SYSTEM_MEMORYALLOCFAIL      = 3,	 /* Memory allocation failure */
-	REBOOT_SYSTEM_WATCHDOG             = 4,	 /* Watchdog timeout */
-	REBOOT_SYSTEM_HW_RESET             = 5,	 /* HW power reset */
-	REBOOT_SYSTEM_USER_INTENDED        = 6,	 /* Reboot from user intention */
-	REBOOT_SYSTEM_BINARY_UPDATE        = 7,	 /* Reboot for Binary Update */
-	REBOOT_SYSTEM_BINARY_RECOVERYFAIL  = 8,	 /* Binary Recovery Fail */
+	REBOOT_REASON_INITIALIZED          = 50,
+	REBOOT_SYSTEM_DATAABORT            = 51, /* Data abort */
+	REBOOT_SYSTEM_PREFETCHABORT        = 52, /* Prefetch abort */
+	REBOOT_SYSTEM_MEMORYALLOCFAIL      = 53, /* Memory allocation failure */
+	REBOOT_SYSTEM_WATCHDOG             = 54, /* Watchdog timeout */
+	REBOOT_SYSTEM_HW_RESET             = 55, /* HW power reset */
+	REBOOT_SYSTEM_USER_INTENDED        = 56, /* Reboot from user intention */
+	REBOOT_SYSTEM_BINARY_UPDATE        = 57, /* Reboot for Binary Update */
+	REBOOT_SYSTEM_BINARY_RECOVERYFAIL  = 58, /* Binary Recovery Fail */
 
-	REBOOT_NETWORK_WIFICORE_WATCHDOG   = 30, /* Wi-Fi Core Watchdog Reset */
-	REBOOT_NETWORK_WIFICORE_PANIC      = 31, /* Wi-Fi Core Panic */
+	REBOOT_NETWORK_WIFICORE_WATCHDOG   = 80, /* Wi-Fi Core Watchdog Reset */
+	REBOOT_NETWORK_WIFICORE_PANIC      = 81, /* Wi-Fi Core Panic */
 
 	REBOOT_UNKNOWN                     = 255,
 } reboot_reason_code_t;
