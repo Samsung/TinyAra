@@ -420,7 +420,7 @@ trwifi_result_e slsidrv_deinit(struct netdev *dev)
 	return result;
 }
 
-trwifi_result_e slsidrv_scan_ap(struct netdev *dev, trwifi_ap_config_s *config)
+trwifi_result_e slsidrv_scan_ap(struct netdev *dev, trwifi_scan_config_s *config)
 {
 	SLSIDRV_ENTER;
 	trwifi_result_e result = TRWIFI_FAIL;
@@ -432,7 +432,7 @@ trwifi_result_e slsidrv_scan_ap(struct netdev *dev, trwifi_ap_config_s *config)
 
 	scan_filter_result.scan_flag = 0;
 	memset(scan_filter_result.scan_ssid, 0, SLSI_SSID_LEN + 1);
-	if (config != NULL) {
+	if (config != NULL && config->ssid_length > 0) {
 		scan_filter_result.scan_flag = 1;
 		if (scan_filter_result.result_list != NULL) {
 			free_scan_results(scan_filter_result.result_list);

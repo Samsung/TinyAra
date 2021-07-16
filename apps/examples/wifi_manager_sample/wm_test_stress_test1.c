@@ -225,7 +225,7 @@ TEST_SETUP(scan)
 	ST_START_TEST;
 
 	ST_EXPECT_EQ(WIFI_MANAGER_SUCCESS, wifi_manager_init(&g_wifi_callbacks));
-	ST_EXPECT_EQ(WIFI_MANAGER_SUCCESS, wifi_manager_scan_ap());
+	ST_EXPECT_EQ(WIFI_MANAGER_SUCCESS, wifi_manager_scan_ap(NULL));
 
 	ST_END_TEST;
 }

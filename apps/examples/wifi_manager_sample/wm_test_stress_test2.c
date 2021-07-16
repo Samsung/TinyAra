@@ -182,7 +182,7 @@ TEST_TEARDOWN(sta_scan)
 TEST_F(sta_scan)
 {
 	ST_START_TEST;
-	ST_EXPECT_EQ(WIFI_MANAGER_SUCCESS, wifi_manager_scan_ap());
+	ST_EXPECT_EQ(WIFI_MANAGER_SUCCESS, wifi_manager_scan_ap(NULL));
 	WO_TEST_WAIT(g_conn, g_wo_queue);
 	ST_END_TEST;
 }
@@ -268,7 +268,7 @@ TEST_TEARDOWN(softap_scan)
 TEST_F(softap_scan)
 {
 	ST_START_TEST;
-	ST_EXPECT_EQ(WIFI_MANAGER_SUCCESS, wifi_manager_scan_ap());
+	ST_EXPECT_EQ(WIFI_MANAGER_SUCCESS, wifi_manager_scan_ap(NULL));
 	WO_TEST_WAIT(g_conn, g_wo_queue);
 	ST_END_TEST;
 }
@@ -298,7 +298,7 @@ TEST_TEARDOWN(softap_joined_scan)
 TEST_F(softap_joined_scan)
 {
 	ST_START_TEST;
-	ST_EXPECT_EQ(WIFI_MANAGER_SUCCESS, wifi_manager_scan_ap());
+	ST_EXPECT_EQ(WIFI_MANAGER_SUCCESS, wifi_manager_scan_ap(NULL));
 	WO_TEST_WAIT(g_conn, g_wo_queue);
 	ST_END_TEST;
 }

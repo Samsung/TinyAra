@@ -125,6 +125,12 @@ typedef struct {
 } trwifi_ap_scan_info_s;
 
 typedef struct {
+	unsigned int channel;                             /**<  wifi channel, =0 is full channel scan */
+	char ssid[TRWIFI_SSID_LEN + 1];                  /**<  Service Set Identification            */
+	unsigned int ssid_length;                         /**<  Service Set Identification Length     */
+} trwifi_scan_config_s;
+
+typedef struct {
 	unsigned int channel;								   /**<	 soft ap wifi channel				*/
 	char ssid[TRWIFI_SSID_LEN + 1];						/**<  Service Set Identification		 */
 	unsigned int ssid_length;							   /**<	 Service Set Identification Length	*/
@@ -229,7 +235,15 @@ typedef trwifi_result_e (*trwifi_deinit)(struct netdev *dev);
  * @return TRWIFI_FAIL         : fail (shouldn't generate an event.)
  * @return TRWIFI_INVALID_ARGS : arguments are invalid
  */
-typedef trwifi_result_e (*trwifi_scan_ap)(struct netdev *dev, trwifi_ap_config_s *config);
+/* scan type
+ *     full scan: config is null
+ *     scan with specific SSID: ssid is set in config
+ *     scan with specific channel: channel is set in config
+ *
+ * invalid usage
+ *     if both SSID and channel are set in config then it'll return error.
+ */
+typedef trwifi_result_e (*trwifi_scan_ap)(struct netdev *dev, trwifi_scan_config_s *config);
 
 /**
  * @brief   Connect to an access point

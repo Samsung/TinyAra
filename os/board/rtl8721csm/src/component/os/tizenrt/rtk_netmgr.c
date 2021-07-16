@@ -56,7 +56,7 @@ static WiFi_InterFace_ID_t g_mode = RTK_WIFI_NONE;
 
 trwifi_result_e wifi_netmgr_utils_init(struct netdev *dev);
 trwifi_result_e wifi_netmgr_utils_deinit(struct netdev *dev);
-trwifi_result_e wifi_netmgr_utils_scan_ap(struct netdev *dev, trwifi_ap_config_s *config);
+trwifi_result_e wifi_netmgr_utils_scan_ap(struct netdev *dev, trwifi_scan_config_s *config);
 trwifi_result_e wifi_netmgr_utils_connect_ap(struct netdev *dev, trwifi_ap_config_s *ap_connect_config, void *arg);
 trwifi_result_e wifi_netmgr_utils_disconnect_ap(struct netdev *dev, void *arg);
 trwifi_result_e wifi_netmgr_utils_get_info(struct netdev *dev, trwifi_info *wifi_info);
@@ -415,15 +415,19 @@ trwifi_result_e wifi_netmgr_utils_deinit(struct netdev *dev)
 	return wuret;
 }
 
-trwifi_result_e wifi_netmgr_utils_scan_ap(struct netdev *dev, trwifi_ap_config_s *config)
+trwifi_result_e wifi_netmgr_utils_scan_ap(struct netdev *dev, trwifi_scan_config_s *config)
 {
 	if (config) {
-		if (config->ssid != NULL) {
+		if (config->ssid_length > 0) {
 			int scan_buf_len = 500;
 			rltk_wlan_enable_scan_with_ssid_by_extended_security(1);
-			if (wifi_scan_networks_with_ssid(parse_scan_with_ssid_res, NULL, scan_buf_len, config->ssid, config->ssid_length) != RTW_SUCCESS) {
+			if (wifi_scan_networks_with_ssid(parse_scan_with_ssid_res, NULL,
+											 scan_buf_len, config->ssid, config->ssid_length) != RTW_SUCCESS) {
 				return TRWIFI_FAIL;
 			}
+		} else {
+			// scan specified channel.
+			return TRWIFI_NOT_SUPPORTED;
 		}
 	} else {
 		if (wifi_scan_networks(app_scan_result_handler, NULL ) != RTW_SUCCESS) {

@@ -131,7 +131,7 @@ int netdev_handle_wifi(struct netdev *dev, lwnl_req cmd, void *data, uint32_t da
 	break;
 	case LWNL_REQ_WIFI_SCANAP:
 	{
-		TRWIFI_CALL(res, dev, scan_ap, (dev, (trwifi_ap_config_s*)data));
+		TRWIFI_CALL(res, dev, scan_ap, (dev, (trwifi_scan_config_s*)data));
 	}
 	break;
 	case LWNL_REQ_WIFI_IOCTL:

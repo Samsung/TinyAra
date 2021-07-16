@@ -66,7 +66,7 @@
 
 static trwifi_result_e slsidrv_init(struct netdev *dev);
 static trwifi_result_e slsidrv_deinit(struct netdev *dev);
-static trwifi_result_e slsidrv_scan_ap(struct netdev *dev, trwifi_ap_config_s *config);
+static trwifi_result_e slsidrv_scan_ap(struct netdev *dev, trwifi_scan_config_s *config);
 static trwifi_result_e slsidrv_connect_ap(struct netdev *dev, trwifi_ap_config_s *ap_connect_config, void *arg);
 static trwifi_result_e slsidrv_disconnect_ap(struct netdev *dev, void *arg);
 static trwifi_result_e slsidrv_get_info(struct netdev *dev, trwifi_info *wifi_info);
@@ -442,7 +442,7 @@ trwifi_result_e slsidrv_deinit(struct netdev *dev)
 	return result;
 }
 
-trwifi_result_e slsidrv_scan_ap(struct netdev *dev, trwifi_ap_config_s *config)
+trwifi_result_e slsidrv_scan_ap(struct netdev *dev, trwifi_scan_config_s *config)
 {
 	SLSIDRV_ENTER;
 	trwifi_result_e result = TRWIFI_FAIL;
@@ -454,7 +454,7 @@ trwifi_result_e slsidrv_scan_ap(struct netdev *dev, trwifi_ap_config_s *config)
 
 	scan_filter_result.scan_flag = 0;
 	memset(scan_filter_result.scan_ssid, 0, SLSI_SSID_LEN + 1);
-	if (config != NULL) {
+	if (config != NULL && config->ssid_length > 0) {
 		scan_filter_result.scan_flag = 1;
 		if (scan_filter_result.result_list != NULL) {
 			free_scan_results(scan_filter_result.result_list);
@@ -506,7 +506,10 @@ trwifi_result_e slsidrv_connect_ap(struct netdev *dev, trwifi_ap_config_s *ap_co
 		// scan to get the security config if it is unknown
 		if (ap_connect_config->ap_auth_type == TRWIFI_AUTH_UNKNOWN ||
 			ap_connect_config->ap_crypto_type == TRWIFI_CRYPTO_UNKNOWN) {
-			result = slsidrv_scan_ap(dev, ap_connect_config);
+			trwifi_scan_config_s sconfig;
+			strncpy(sconfig.ssid, ap_connect_config->ssid, ap_connect_config->ssid_length + 1);
+			sconfig.ssid_length = ap_connect_config->ssid_length;
+			result = slsidrv_scan_ap(dev, &sconfig);
 			if (result != TRWIFI_SUCCESS) {
 				vddbg("slsidrv_scan_ap failed! ssid:%s\n", ap_connect_config->ssid);
 				goto connect_ap_fail;

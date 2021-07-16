@@ -209,11 +209,11 @@ static ssize_t lwnl_write(struct file *filep, const char *buffer, size_t len)
 	LWNL_ENTER(TAG);
 #ifdef CONFIG_NET_NETMGR
 	int ret = netdev_req_handle(buffer, len);
-#ifdef CONFIG_BLE_MANAGER	
+#ifdef CONFIG_BLE_MANAGER
 	if (ret == -ENOSYS) {
 		ret = bledev_req_handle(buffer, len);
 	}
-#endif	
+#endif
 #else
 	int ret = lwnl_message_handle(buffer, len);
 #endif

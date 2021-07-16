@@ -443,7 +443,7 @@ void things_wifi_scan_done(wifi_manager_scan_info_s **scan_result, wifi_manager_
 
 int things_wifi_scan_ap(void)
 {
-	if (wifi_manager_scan_ap() != WIFI_MANAGER_SUCCESS) {
+	if (wifi_manager_scan_ap(NULL) != WIFI_MANAGER_SUCCESS) {
 		THINGS_LOG_E(TAG, "Wifi manager scan ap failed");
 		return 0;
 	}

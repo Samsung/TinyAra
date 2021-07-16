@@ -563,13 +563,17 @@ void _wt_scan(void *arg)
 
 	struct wt_options *ap_info = (struct wt_options *)arg;
 	if (ap_info->scan_specific) {
-		wifi_manager_ap_config_s config;
+		wifi_manager_scan_config_s config;
 		memset(&config, 0, sizeof(config));
-		config.ssid_length = strlen(ap_info->ssid);
-		strncpy(config.ssid, ap_info->ssid, config.ssid_length + 1);
-		res = wifi_manager_scan_specific_ap(&config);
+		if (ap_info->ssid) {
+			config.ssid_length = strlen(ap_info->ssid);
+			strncpy(config.ssid, ap_info->ssid, config.ssid_length + 1);
+		} else if (ap_info->channel > 0) {
+			config.channel = ap_info->channel;
+		}
+		res = wifi_manager_scan_ap(&config);
 	} else {
-		res = wifi_manager_scan_ap();
+		res = wifi_manager_scan_ap(NULL);
 	}
 	if (res != WIFI_MANAGER_SUCCESS) {
 		WT_LOGE(TAG, "scan Fail");
@@ -822,13 +826,23 @@ int _wt_parse_set(struct wt_options *opt, int argc, char *argv[])
 
 int _wt_parse_scan(struct wt_options *opt, int argc, char *argv[])
 {
-	if (argc == 4) {
-		opt->ssid = argv[3];
+	if (argc == 5) {
 		opt->scan_specific = 1;
-	} else {
+		if (strncmp("ssid", argv[3], strlen("ssid") + 1) == 0) {
+			opt->ssid = argv[4];
+
+		} else if (strncmp("ch", argv[3], strlen("ch") + 1) == 0) {
+			opt->channel = atoi(argv[4]);
+		} else {
+			return -1;
+		}
+		return 0;
+	} else if (argc == 3) {
+		// full scan
 		opt->scan_specific = 0;
+		return 0;
 	}
-	return 0;
+	return -1;
 }
 
 int _wt_parse_auto(struct wt_options *opt, int argc, char *argv[])
@@ -888,6 +902,7 @@ int _wt_parse_commands(struct wt_options *opt, int argc, char *argv[])
 void _wt_process(int argc, char *argv[])
 {
 	struct wt_options opt;
+	memset(&opt, 0, sizeof(struct wt_options));
 	int res = _wt_parse_commands(&opt, argc, argv);
 	if (res < 0) {
 		WT_LOGE(TAG, "%s", WT_USAGE);

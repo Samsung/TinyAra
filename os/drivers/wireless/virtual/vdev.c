@@ -44,7 +44,7 @@
  ****************************************************************************/
 static trwifi_result_e vdev_init(struct netdev *dev);
 static trwifi_result_e vdev_deinit(struct netdev *dev);
-static trwifi_result_e vdev_scan_ap(struct netdev *dev, trwifi_ap_config_s *config);
+static trwifi_result_e vdev_scan_ap(struct netdev *dev, trwifi_scan_config_s *config);
 static trwifi_result_e vdev_connect_ap(struct netdev *dev, trwifi_ap_config_s *ap_connect_config, void *arg);
 static trwifi_result_e vdev_disconnect_ap(struct netdev *dev, void *arg);
 static trwifi_result_e vdev_get_info(struct netdev *dev, trwifi_info *wifi_info);
@@ -341,11 +341,11 @@ trwifi_result_e vdev_deinit(struct netdev *dev)
 	return tres;
 }
 
-trwifi_result_e vdev_scan_ap(struct netdev *dev, trwifi_ap_config_s *config)
+trwifi_result_e vdev_scan_ap(struct netdev *dev, trwifi_scan_config_s *config)
 {
 	VWIFI_ENTRY;
 	trwifi_result_e tres = TRWIFI_SUCCESS;
-	struct vwifi_req req = {VWIFI_MSG_SCANAP, NULL, tres};
+	struct vwifi_req req = {VWIFI_MSG_SCANAP, (void *)config, tres};
 	int res = _progress_message(&req);
 	if (res < 0) {
 		return TRWIFI_FAIL;

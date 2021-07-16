@@ -176,7 +176,7 @@ static int _run_procedure(void)
 
 	/*  scan in softAP mode */
 	WT_LOG(TAG, "scan in softAP mode");
-	wres = wifi_manager_scan_ap();
+	wres = wifi_manager_scan_ap(NULL);
 	if (wres != WIFI_MANAGER_SUCCESS) {
 		WT_LOGE(TAG, "fail to scan %d\n", wres);
 		return -1;
@@ -197,7 +197,7 @@ static int _run_procedure(void)
 
 	/*  scan in STA mode */
 	WT_LOG(TAG, "scan in STA mode");
-	wres = wifi_manager_scan_ap();
+	wres = wifi_manager_scan_ap(NULL);
 	if (wres != WIFI_MANAGER_SUCCESS) {
 		WT_LOGE(TAG, "fail to scan %d\n", wres);
 		return -1;
@@ -220,7 +220,7 @@ static int _run_procedure(void)
 
 	/*  scan in connected state */
 	WT_LOG(TAG, "scan in connected state of STA mode");
-	wres = wifi_manager_scan_ap();
+	wres = wifi_manager_scan_ap(NULL);
 	if (wres != WIFI_MANAGER_SUCCESS) {
 		WT_LOGE(TAG, "fail to scan %d\n", wres);
 		return -1;
