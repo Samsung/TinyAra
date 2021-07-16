@@ -1272,6 +1272,11 @@ _WEAK void wifi_set_mib(void)
 	wext_set_adaptivity(RTW_ADAPTIVITY_DISABLE);
 	//trp tis
 	wext_set_trp_tis(DISABLE);
+
+#if defined(CONFIG_PLATFORM_TIZENRT_OS)
+	//send deauth before auth to disconnect from AP to resolve AP compatibility issue
+	rltk_wlan_enable_issue_deauth(ENABLE);
+#endif
 }
 
 //----------------------------------------------------------------------------//
