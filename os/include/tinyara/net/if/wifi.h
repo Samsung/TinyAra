@@ -113,6 +113,17 @@ typedef struct {
 } trwifi_ap_config_s;
 
 typedef struct {
+	unsigned char scan_mode;				/**<  0:full, 1:partial						*/
+	unsigned char scan_opt;					/**<  0:active, 1:passive in all channel, 2:force active	*/
+	unsigned char *channel_2g;				/**<  2g channel list						*/
+	unsigned char channel_2g_len;				/**<  2g channel length						*/
+	unsigned char *channel_5g;				/**<  5g channel list						*/
+	unsigned char channel_5g_len;				/**<  5g channel length						*/
+	char *ssid;						/**<  Service Set Identification (i.e. Name of Access Point)	*/
+	char *bssid;						/**<  MAC address (xx:xx:xx:xx:xx:xx) of Access Point		*/
+} trwifi_scan_config_s;
+
+typedef struct {
 	unsigned int channel;								   /**<	 Radio channel that the AP beacon was received on		*/
 	char ssid[TRWIFI_SSID_LEN + 1];						/**<  Service Set Identification (i.e. Name of Access Point) */
 	unsigned int ssid_length;							   /**<	 The length of Service Set Identification				*/

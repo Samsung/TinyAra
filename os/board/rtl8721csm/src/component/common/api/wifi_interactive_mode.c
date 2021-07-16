@@ -55,7 +55,7 @@
 #ifndef CONFIG_ENABLE_P2P
 #define CONFIG_ENABLE_P2P 0
 #endif
-#define SCAN_WITH_SSID 0
+#define SCAN_WITH_SSID 1
 
 #ifdef CONFIG_WPS
 #define STACKSIZE 1280
@@ -835,7 +835,8 @@ extern int8_t wifi_scan_result_callback(wifi_utils_scan_list_s *scan_list, int s
 
 
 #if SCAN_WITH_SSID
-static void cmd_wifi_scan_with_ssid(int argc, char **argv)
+#define SCAN_BUF_LEN 1000
+int8_t cmd_wifi_scan_with_ssid(trwifi_scan_config_s *scan_config)
 {
 
 	u8 *channel_list = NULL;
@@ -843,64 +844,70 @@ static void cmd_wifi_scan_with_ssid(int argc, char **argv)
 
 	char *ssid = NULL;
 	int ssid_len = 0;
-	//Fully scan
-	int scan_buf_len = 500;
-	if (argc == 3 && argv[1] && argv[2]) {
-		ssid = argv[1];
-		ssid_len = strlen((const char *)argv[1]);
-		if ((ssid_len <= 0) || (ssid_len > 32)) {
-			ndbg("\n\rWrong ssid. Length must be less than 32.");
-			goto exit;
+	unsigned char mode = 0;
+	int num_channel = 0;
+
+	int scan_buf_len = SCAN_BUF_LEN;
+	if (!scan_config) {
+		return;
+	}
+	mode = scan_config->scan_mode;
+
+	if (0 == mode) {	//full scan
+		if (!scan_config->ssid) {
+			ssid = scan_config->ssid;
+			ssid_len = strlen((const char *)ssid);
+			if ((ssid_len <= 0) || (ssid_len > 32)) {
+				RTW_API_INFO("\n\rWrong ssid. Length must be less than 32.");
+				return;
+			}
 		}
-		scan_buf_len = atoi(argv[2]);
 		if (scan_buf_len < 36) {
-			ndbg("\n\rBUFFER_LENGTH too short\n\r");
-			goto exit;
+			RTW_API_INFO("\n\rBUFFER_LENGTH too short\n\r");
+			return;
 		}
-	} else if (argc > 3) {
-		int i = 0;
-		int num_channel = atoi(argv[2]);
-		ssid = argv[1];
-		ssid_len = strlen((const char *)argv[1]);
-		if ((ssid_len <= 0) || (ssid_len > 32)) {
-			ndbg("\n\rWrong ssid. Length must be less than 32.");
-			goto exit;
+	} else if (1 == mode) {	// partial scan
+		if (!scan_config->ssid) {
+			ssid = scan_config->ssid;
+			ssid_len = strlen((const char *)ssid);
+			if ((ssid_len <= 0) || (ssid_len > 32)) {
+				RTW_API_INFO("\n\rWrong ssid. Length must be less than 32.");
+				goto exit;
+			}
 		}
-		channel_list = (u8 *)pvPortMalloc(num_channel);
+		num_channel = scan_config->channel_2g_len;
+		channel_list = (u8 *)rtw_malloc(num_channel);
 		if (!channel_list) {
-			ndbg("\n\r ERROR: Can't malloc memory for channel list");
+			RTW_API_INFO("\n\r ERROR: Can't malloc memory for channel list");
 			goto exit;
 		}
-		pscan_config = (u8 *)pvPortMalloc(num_channel);
+		rtw_memcpy(channel_list, scan_config->channel_2g, num_channel);
+		pscan_config = (u8 *)rtw_malloc(num_channel);
 		if (!pscan_config) {
-			ndbg("\n\r ERROR: Can't malloc memory for pscan_config");
+			RTW_API_INFO("\n\r ERROR: Can't malloc memory for pscan_config");
 			goto exit;
 		}
-		//parse command channel list
-		for (i = 3; i <= argc - 1; i++) {
-			*(channel_list + i - 3) = (u8)atoi(argv[i]);
-			*(pscan_config + i - 3) = PSCAN_ENABLE;
-		}
+		rtw_memset(pscan_config, PSCAN_ENABLE, num_channel);
 		if (wifi_set_pscan_chan(channel_list, pscan_config, num_channel) < 0) {
-			ndbg("\n\rERROR: wifi set partial scan channel fail");
+			RTW_API_INFO("\n\rERROR: wifi set partial scan channel fail");
 			goto exit;
 		}
 	} else {
-		nvdbg("\n\r For Scan all channel Usage: wifi_scan_with_ssid ssid BUFFER_LENGTH");
-		nvdbg("\n\r For Scan partial channel Usage: wifi_scan_with_ssid ssid num_channels channel_num1 ...");
-		return;
+		RTW_API_INFO("\n\r For Scan all channel Usage: wifi_scan_with_ssid ssid");
+		RTW_API_INFO("\n\r For Scan partial channel Usage: wifi_scan_with_ssid ssid num_channels channel_num1 ...");
+		return -1;
 	}
 
 	if (wifi_scan_networks_with_ssid(NULL, NULL, scan_buf_len, ssid, ssid_len) != RTW_SUCCESS) {
-		ndbg("\n\rERROR: wifi scan failed");
+		RTW_API_INFO("\n\rERROR: wifi scan failed");
 		goto exit;
 	}
-
 exit:
-	if (argc > 2 && channel_list)
-		vPortFree(channel_list);
-	if (argc > 2 && pscan_config)
-		vPortFree(pscan_config);
+	if ((mode == 1) && channel_list)
+		rtw_mfree(channel_list, num_channel);
+	if ((mode == 1) && pscan_config)
+		rtw_mfree(pscan_config, num_channel);
+	return 0;
 }
 #endif
 void cmd_wifi_scan(int argc, char **argv)

@@ -57,6 +57,7 @@ static WiFi_InterFace_ID_t g_mode = RTK_WIFI_NONE;
 trwifi_result_e wifi_netmgr_utils_init(struct netdev *dev);
 trwifi_result_e wifi_netmgr_utils_deinit(struct netdev *dev);
 trwifi_result_e wifi_netmgr_utils_scan_ap(struct netdev *dev, trwifi_ap_config_s *config);
+trwifi_result_e wifi_netmgr_utils_single_channel_scan(struct netdev *dev, trwifi_scan_config_s *config);
 trwifi_result_e wifi_netmgr_utils_connect_ap(struct netdev *dev, trwifi_ap_config_s *ap_connect_config, void *arg);
 trwifi_result_e wifi_netmgr_utils_disconnect_ap(struct netdev *dev, void *arg);
 trwifi_result_e wifi_netmgr_utils_get_info(struct netdev *dev, trwifi_info *wifi_info);
@@ -432,6 +433,19 @@ trwifi_result_e wifi_netmgr_utils_scan_ap(struct netdev *dev, trwifi_ap_config_s
 		}
 	}
 	nvdbg("[RTK] WIFi Scan success\n");
+	return TRWIFI_SUCCESS;
+}
+
+trwifi_result_e wifi_netmgr_utils_single_channel_scan(struct netdev *dev, trwifi_scan_config_s *scan_config)
+{
+	if (!scan_config) {
+		return TRWIFI_INVALID_ARGS;
+	}
+
+	if (cmd_wifi_scan_with_ssid(scan_config) != RTW_SUCCESS) {
+		return TRWIFI_FAIL;
+	}
+	ndbg("[RTK] WIFi Scan success\n");
 	return TRWIFI_SUCCESS;
 }
 
