@@ -40,6 +40,10 @@ typedef enum {
 	REBOOT_SYSTEM_BINARY_UPDATE        = 7,	 /* Reboot for Binary Update */
 	REBOOT_SYSTEM_BINARY_RECOVERYFAIL  = 8,	 /* Binary Recovery Fail */
 
+	REBOOT_SYSTEM_DSLP_RESET           = 27, /* System wake up from deep sleep */
+	REBOOT_SYSTEM_SYS_RESET            = 28, /* System reset by calling sys_reset */
+	REBOOT_SYSTEM_BOD_RESET            = 29, /* Brownout reset */
+
 	REBOOT_NETWORK_WIFICORE_WATCHDOG   = 30, /* Wi-Fi Core Watchdog Reset */
 	REBOOT_NETWORK_WIFICORE_PANIC      = 31, /* Wi-Fi Core Panic */
 
