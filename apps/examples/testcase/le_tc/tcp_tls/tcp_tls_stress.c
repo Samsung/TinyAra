@@ -105,6 +105,57 @@ static void wm_sta_disconnected(wifi_manager_disconnect_e);
 /*
  * Global
  */
+ static const char google_ca_cert[] = "-----BEGIN CERTIFICATE-----\n"
+            "MIIDVDCCAjygAwIBAgIDAjRWMA0GCSqGSIb3DQEBBQUAMEIxCzAJBgNVBAYTAlVT\n"
+            "MRYwFAYDVQQKEw1HZW9UcnVzdCBJbmMuMRswGQYDVQQDExJHZW9UcnVzdCBHbG9i\n"
+            "YWwgQ0EwHhcNMDIwNTIxMDQwMDAwWhcNMjIwNTIxMDQwMDAwWjBCMQswCQYDVQQG\n"
+            "EwJVUzEWMBQGA1UEChMNR2VvVHJ1c3QgSW5jLjEbMBkGA1UEAxMSR2VvVHJ1c3Qg\n"
+            "R2xvYmFsIENBMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2swYYzD9\n"
+            "9BcjGlZ+W988bDjkcbd4kdS8odhM+KhDtgPpTSEHCIjaWC9mOSm9BXiLnTjoBbdq\n"
+            "fnGk5sRgprDvgOSJKA+eJdbtg/OtppHHmMlCGDUUna2YRpIuT8rxh0PBFpVXLVDv\n"
+            "iS2Aelet8u5fa9IAjbkU+BQVNdnARqN7csiRv8lVK83Qlz6cJmTM386DGXHKTubU\n"
+            "1XupGc1V3sjs0l44U+VcT4wt/lAjNvxm5suOpDkZALeVAjmRCw7+OC7RHQWa9k0+\n"
+            "bw8HHa8sHo9gOeL6NlMTOdReJivbPagUvTLrGAMoUgRx5aszPeE4uwc2hGKceeoW\n"
+            "MPRfwCvocWvk+QIDAQABo1MwUTAPBgNVHRMBAf8EBTADAQH/MB0GA1UdDgQWBBTA\n"
+            "ephojYn7qwVkDBF9qn1luMrMTjAfBgNVHSMEGDAWgBTAephojYn7qwVkDBF9qn1l\n"
+            "uMrMTjANBgkqhkiG9w0BAQUFAAOCAQEANeMpauUvXVSOKVCUn5kaFOSPeCpilKIn\n"
+            "Z57QzxpeR+nBsqTP3UEaBU6bS+5Kb1VSsyShNwrrZHYqLizz/Tt1kL/6cdjHPTfS\n"
+            "tQWVYrmm3ok9Nns4d0iXrKYgjy6myQzCsplFAMfOEVEiIuCl6rYVSAlk6l5PdPcF\n"
+            "PseKUgzbFbS9bZvlxrFUaKnjaZC2mqUPuLk/IH2uSrW4nOQdtqvmlKXBx4Ot2/Un\n"
+            "hw4EbNX/3aBd7YdStysVAq45pmp06drE57xNNB6pXE0zX5IJL4hmXXeXxx12E6nV\n"
+            "5fEWCRE11azbJHFwLJhWC9kXtNHjUStedejV0NxPNO3CBWaAocvmMw==\n"
+            "-----END CERTIFICATE-----";
+
+static const char facebook_ca_cert[] =
+		"-----BEGIN CERTIFICATE-----\n"
+		"MIIEsTCCA5mgAwIBAgIQBOHnpNxc8vNtwCtCuF0VnzANBgkqhkiG9w0BAQsFADBs\n"
+		"MQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3\n"
+		"d3cuZGlnaWNlcnQuY29tMSswKQYDVQQDEyJEaWdpQ2VydCBIaWdoIEFzc3VyYW5j\n"
+		"ZSBFViBSb290IENBMB4XDTEzMTAyMjEyMDAwMFoXDTI4MTAyMjEyMDAwMFowcDEL\n"
+		"MAkGA1UEBhMCVVMxFTATBgNVBAoTDERpZ2lDZXJ0IEluYzEZMBcGA1UECxMQd3d3\n"
+		"LmRpZ2ljZXJ0LmNvbTEvMC0GA1UEAxMmRGlnaUNlcnQgU0hBMiBIaWdoIEFzc3Vy\n"
+		"YW5jZSBTZXJ2ZXIgQ0EwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC2\n"
+		"4C/CJAbIbQRf1+8KZAayfSImZRauQkCbztyfn3YHPsMwVYcZuU+UDlqUH1VWtMIC\n"
+		"Kq/QmO4LQNfE0DtyyBSe75CxEamu0si4QzrZCwvV1ZX1QK/IHe1NnF9Xt4ZQaJn1\n"
+		"itrSxwUfqJfJ3KSxgoQtxq2lnMcZgqaFD15EWCo3j/018QsIJzJa9buLnqS9UdAn\n"
+		"4t07QjOjBSjEuyjMmqwrIw14xnvmXnG3Sj4I+4G3FhahnSMSTeXXkgisdaScus0X\n"
+		"sh5ENWV/UyU50RwKmmMbGZJ0aAo3wsJSSMs5WqK24V3B3aAguCGikyZvFEohQcft\n"
+		"bZvySC/zA/WiaJJTL17jAgMBAAGjggFJMIIBRTASBgNVHRMBAf8ECDAGAQH/AgEA\n"
+		"MA4GA1UdDwEB/wQEAwIBhjAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIw\n"
+		"NAYIKwYBBQUHAQEEKDAmMCQGCCsGAQUFBzABhhhodHRwOi8vb2NzcC5kaWdpY2Vy\n"
+		"dC5jb20wSwYDVR0fBEQwQjBAoD6gPIY6aHR0cDovL2NybDQuZGlnaWNlcnQuY29t\n"
+		"L0RpZ2lDZXJ0SGlnaEFzc3VyYW5jZUVWUm9vdENBLmNybDA9BgNVHSAENjA0MDIG\n"
+		"BFUdIAAwKjAoBggrBgEFBQcCARYcaHR0cHM6Ly93d3cuZGlnaWNlcnQuY29tL0NQ\n"
+		"UzAdBgNVHQ4EFgQUUWj/kK8CB3U8zNllZGKiErhZcjswHwYDVR0jBBgwFoAUsT7D\n"
+		"aQP4v0cB1JgmGggC72NkK8MwDQYJKoZIhvcNAQELBQADggEBABiKlYkD5m3fXPwd\n"
+		"aOpKj4PWUS+Na0QWnqxj9dJubISZi6qBcYRb7TROsLd5kinMLYBq8I4g4Xmk/gNH\n"
+		"E+r1hspZcX30BJZr01lYPf7TMSVcGDiEo+afgv2MW5gxTs14nhr9hctJqvIni5ly\n"
+		"/D6q1UEL2tU2ob8cbkdJf17ZSHwD2f2LSaCYJkJA69aSEaRkCldUxPUd1gJea6zu\n"
+		"xICaEnL6VpPX/78whQYwvwt/Tv9XBZ0k7YXDK/umdaisLRbvfXknsuvCnQsH6qqF\n"
+		"0wGjIChBWUMo0oHjqvbsezt3tkBigAVBRQHvFwY+3sAzm2fTYS5yh+Rp/BIAV0Ae\n"
+		"cPUeybQ=\n"
+		"-----END CERTIFICATE-----";
+
 unsigned char SIMPLE_GET_REQUEST[] = "GET / HTTP/1.1\r\n"
 									"Host: \r\n"
 									"Connection: close\r\n"
@@ -170,37 +221,8 @@ tcp_tls_result_e tcp_tls_hostname_to_ip4(char *hostname, unsigned int *ip4_addre
 tcp_tls_result_e tcp_tls_config_get(tls_config * config)
 {
 	tcp_tls_result_e ret = TCP_TLS_SUCCESS;
-	static const char facebook_ca_cert[] =  
-		"-----BEGIN CERTIFICATE-----\n"
-		"MIIEsTCCA5mgAwIBAgIQBOHnpNxc8vNtwCtCuF0VnzANBgkqhkiG9w0BAQsFADBs\n" 
-		"MQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3\n" 
-		"d3cuZGlnaWNlcnQuY29tMSswKQYDVQQDEyJEaWdpQ2VydCBIaWdoIEFzc3VyYW5j\n" 
-		"ZSBFViBSb290IENBMB4XDTEzMTAyMjEyMDAwMFoXDTI4MTAyMjEyMDAwMFowcDEL\n" 
-		"MAkGA1UEBhMCVVMxFTATBgNVBAoTDERpZ2lDZXJ0IEluYzEZMBcGA1UECxMQd3d3\n" 
-		"LmRpZ2ljZXJ0LmNvbTEvMC0GA1UEAxMmRGlnaUNlcnQgU0hBMiBIaWdoIEFzc3Vy\n" 
-		"YW5jZSBTZXJ2ZXIgQ0EwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC2\n" 
-		"4C/CJAbIbQRf1+8KZAayfSImZRauQkCbztyfn3YHPsMwVYcZuU+UDlqUH1VWtMIC\n" 
-		"Kq/QmO4LQNfE0DtyyBSe75CxEamu0si4QzrZCwvV1ZX1QK/IHe1NnF9Xt4ZQaJn1\n" 
-		"itrSxwUfqJfJ3KSxgoQtxq2lnMcZgqaFD15EWCo3j/018QsIJzJa9buLnqS9UdAn\n" 
-		"4t07QjOjBSjEuyjMmqwrIw14xnvmXnG3Sj4I+4G3FhahnSMSTeXXkgisdaScus0X\n" 
-		"sh5ENWV/UyU50RwKmmMbGZJ0aAo3wsJSSMs5WqK24V3B3aAguCGikyZvFEohQcft\n" 
-		"bZvySC/zA/WiaJJTL17jAgMBAAGjggFJMIIBRTASBgNVHRMBAf8ECDAGAQH/AgEA\n" 
-		"MA4GA1UdDwEB/wQEAwIBhjAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIw\n" 
-		"NAYIKwYBBQUHAQEEKDAmMCQGCCsGAQUFBzABhhhodHRwOi8vb2NzcC5kaWdpY2Vy\n" 
-		"dC5jb20wSwYDVR0fBEQwQjBAoD6gPIY6aHR0cDovL2NybDQuZGlnaWNlcnQuY29t\n" 
-		"L0RpZ2lDZXJ0SGlnaEFzc3VyYW5jZUVWUm9vdENBLmNybDA9BgNVHSAENjA0MDIG\n" 
-		"BFUdIAAwKjAoBggrBgEFBQcCARYcaHR0cHM6Ly93d3cuZGlnaWNlcnQuY29tL0NQ\n" 
-		"UzAdBgNVHQ4EFgQUUWj/kK8CB3U8zNllZGKiErhZcjswHwYDVR0jBBgwFoAUsT7D\n" 
-		"aQP4v0cB1JgmGggC72NkK8MwDQYJKoZIhvcNAQELBQADggEBABiKlYkD5m3fXPwd\n" 
-		"aOpKj4PWUS+Na0QWnqxj9dJubISZi6qBcYRb7TROsLd5kinMLYBq8I4g4Xmk/gNH\n" 
-		"E+r1hspZcX30BJZr01lYPf7TMSVcGDiEo+afgv2MW5gxTs14nhr9hctJqvIni5ly\n" 
-		"/D6q1UEL2tU2ob8cbkdJf17ZSHwD2f2LSaCYJkJA69aSEaRkCldUxPUd1gJea6zu\n" 
-		"xICaEnL6VpPX/78whQYwvwt/Tv9XBZ0k7YXDK/umdaisLRbvfXknsuvCnQsH6qqF\n" 
-		"0wGjIChBWUMo0oHjqvbsezt3tkBigAVBRQHvFwY+3sAzm2fTYS5yh+Rp/BIAV0Ae\n" 
-		"cPUeybQ=\n" 
-		"-----END CERTIFICATE-----";
-
 	unsigned int ip4_addr = 0;
+#if 0
 	ret = tcp_tls_hostname_to_ip4("www.facebook.com", &ip4_addr);
 	if (ret != TCP_TLS_SUCCESS) {
 		ndbg("tcp_tls_hostname_to_ip4 fails!\n");
@@ -210,6 +232,17 @@ tcp_tls_result_e tcp_tls_config_get(tls_config * config)
 	config->ca_certificate_length = sizeof(facebook_ca_cert);
 	config->ip4_addr = ip4_addr;
 	config->port_num = 443;
+#else
+	ret = tcp_tls_hostname_to_ip4("www.google.com", &ip4_addr);
+	if (ret != TCP_TLS_SUCCESS) {
+		ndbg("tcp_tls_hostname_to_ip4 fails!\n");
+		return ret;
+	}
+	config->ca_certificate = (char *) google_ca_cert;
+	config->ca_certificate_length = sizeof(google_ca_cert);
+	config->ip4_addr = ip4_addr;
+	config->port_num = 443;
+#endif
 	return ret;
 }
 
@@ -277,7 +310,9 @@ static tcp_tls_result_e tcp_tls_create(mbedtls_config *tls)
 	}
 
 	mbedtls_ssl_conf_rng(tls->conf, mbedtls_ctr_drbg_random, tls->ctr_drbg);
-	mbedtls_ssl_conf_authmode(tls->conf, MBEDTLS_SSL_VERIFY_REQUIRED);
+	// even though verifying certificate is fail. optional option proceed tls session
+	mbedtls_ssl_conf_authmode(tls->conf, MBEDTLS_SSL_VERIFY_OPTIONAL);
+	//mbedtls_ssl_conf_authmode(tls->conf, MBEDTLS_SSL_VERIFY_REQUIRED);
 
 	mbedtls_ssl_set_timer_cb(tls->tls_ctx, tls->timer,
 			mbedtls_timing_set_delay, mbedtls_timing_get_delay);
@@ -337,7 +372,7 @@ static tcp_tls_result_e tcp_tls_connect(mbedtls_config *tls, tls_config *tls_con
 	mbedtls_ssl_set_bio(tls->tls_ctx, tls->server_fd, mbedtls_net_send,
 			NULL, mbedtls_net_recv_timeout);
 	//mbedtls_ssl_conf_authmode(tls->conf, MBEDTLS_SSL_VERIFY_OPTIONAL);
-	
+
 	while ((ret = mbedtls_ssl_handshake(tls->tls_ctx)) != 0) {
 		unsigned int flags;
 
@@ -485,7 +520,7 @@ static tcp_tls_result_e tcp_tls_write(mbedtls_config *tls, unsigned char *data, 
 	*write_count = ret;
 	result = TCP_TLS_SUCCESS;
 	printf("TCP_TLS write succeeds: %d\n", result);
-	
+
 	return result;
 }
 
@@ -528,7 +563,7 @@ void *tcp_tls_sync_time_ntp(void *data)
 	} else {
 		printf("ntpc already runnig\n");
 	}
-	
+
 	if (ntpc_stop() < 0) {
 		printf("ntcp_stop() failed.\n");
 	}
@@ -697,13 +732,14 @@ TEST_F(tls_recv)
 
 void tcp_tls_stress_test(int argc, FAR char *argv[])
 {
-	ST_SET_PACK(tcp_tls, tls_create);
+	ST_SET_PACK(tcp_tls);
 
-	ST_SET_SMOKE(tcp_tls, TCP_TLS_TRIAL, 500000, "recv TCP-TLS", tls_recv);
-	ST_SET_SMOKE(tcp_tls, TCP_TLS_TRIAL, 50000, "send TCP-TLS", tls_send);
-	ST_SET_SMOKE(tcp_tls, TCP_TLS_TRIAL, 2000000, "connect TCP-TLS", tls_connect);
-	ST_SET_SMOKE(tcp_tls, TCP_TLS_TRIAL, 50000, "destroy TCP-TLS", tls_destroy);
-	ST_SET_SMOKE(tcp_tls, TCP_TLS_TRIAL, 50000, "create TCP-TLS", tls_create);
+	ST_SET_SMOKE(tcp_tls, TCP_TLS_TRIAL, 0, "create TCP-TLS", tls_create);
+	ST_SET_SMOKE(tcp_tls, TCP_TLS_TRIAL, 0, "recv TCP-TLS", tls_recv);
+	ST_SET_SMOKE(tcp_tls, TCP_TLS_TRIAL, 0, "send TCP-TLS", tls_send);
+	ST_SET_SMOKE(tcp_tls, TCP_TLS_TRIAL, 0, "connect TCP-TLS", tls_connect);
+	ST_SET_SMOKE(tcp_tls, TCP_TLS_TRIAL, 0, "destroy TCP-TLS", tls_destroy);
+	ST_SET_SMOKE(tcp_tls, TCP_TLS_TRIAL, 0, "create TCP-TLS", tls_create);
 
 	ST_RUN_TEST(tcp_tls);
 	ST_RESULT_TEST(tcp_tls);
@@ -722,7 +758,7 @@ int tc_tcp_tls_main(int argc, char *argv[])
 	if (res < 0) {
 		return -1;
 	}
-	
+
 	wifi_manager_result_e ret = WIFI_MANAGER_FAIL;
 	ret = wifi_manager_init(&g_wifi_callbacks);
 	if (ret == WIFI_MANAGER_FAIL) {
