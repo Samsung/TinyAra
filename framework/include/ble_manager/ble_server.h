@@ -131,10 +131,6 @@ ble_result_e ble_server_set_adv_data(ble_data *data);
 // Set Scan Response Data 
 ble_result_e ble_server_set_adv_resp(ble_data *data);
 
-// Get whether the con_handle is active or not
-ble_result_e ble_server_conn_is_active(ble_conn_handle con_handle, bool *is_active);
-ble_result_e ble_server_conn_is_any_active(bool *is_active);
-
 // Disconnect client. The client with secured connection would be required pairing again. 
 ble_result_e ble_server_disconnect(ble_conn_handle con_handle);
 

@@ -57,6 +57,23 @@ ble_result_e ble_manager_get_mac_addr(uint8_t mac[BLE_BD_ADDR_MAX_LEN])
 	RETURN_RESULT(res, msg);
 }
 
+ble_result_e ble_manager_conn_is_active(ble_conn_handle con_handle, bool *is_active)
+{
+	blemgr_msg_params param = { 2, {(void *)&con_handle, (void *)is_active} };
+	blemgr_msg_s msg = {BLE_EVT_CMD_CONN_IS_ACTIVE, BLE_MANAGER_FAIL, (void *)(&param), NULL};
+	int res = blemgr_post_message(&msg);
+
+	RETURN_RESULT(res, msg);
+}
+
+ble_result_e ble_manager_conn_is_any_active(bool *is_active)
+{
+	blemgr_msg_s msg = {BLE_EVT_CMD_CONN_IS_ANY_ACTIVE, BLE_MANAGER_FAIL, (void *)(is_active), NULL};
+	int res = blemgr_post_message(&msg);
+
+	RETURN_RESULT(res, msg);
+}
+
 /* Client */
 ble_result_e ble_client_disconnect(ble_conn_handle conn_handle)
 {
@@ -274,23 +291,6 @@ ble_result_e ble_server_set_adv_data(ble_data *data)
 ble_result_e ble_server_set_adv_resp(ble_data *data)
 {
 	blemgr_msg_s msg = {BLE_EVT_CMD_SET_ADV_RESP, BLE_MANAGER_FAIL, (void *)(data), NULL};
-	int res = blemgr_post_message(&msg);
-
-	RETURN_RESULT(res, msg);
-}
-
-ble_result_e ble_server_conn_is_active(ble_conn_handle con_handle, bool *is_active)
-{
-	blemgr_msg_params param = { 2, {(void *)&con_handle, (void *)is_active} };
-	blemgr_msg_s msg = {BLE_EVT_CMD_CONN_IS_ACTIVE, BLE_MANAGER_FAIL, (void *)(&param), NULL};
-	int res = blemgr_post_message(&msg);
-
-	RETURN_RESULT(res, msg);
-}
-
-ble_result_e ble_server_conn_is_any_active(bool *is_active)
-{
-	blemgr_msg_s msg = {BLE_EVT_CMD_CONN_IS_ANY_ACTIVE, BLE_MANAGER_FAIL, (void *)(is_active), NULL};
 	int res = blemgr_post_message(&msg);
 
 	RETURN_RESULT(res, msg);

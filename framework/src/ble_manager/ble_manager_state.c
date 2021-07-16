@@ -138,6 +138,21 @@ ble_result_e blemgr_handle_request(blemgr_msg_s *msg)
 
 		ret = ble_drv_delete_bond_all(mode);
 	} break;
+	case BLE_EVT_CMD_CONN_IS_ACTIVE: {
+		BLE_STATE_CHECK;
+
+		blemgr_msg_params *param = (blemgr_msg_params *)msg->param;
+		trble_conn_handle con_handle = *(trble_conn_handle *)param->param[0];
+		bool *is_active = (bool *)param->param[1];
+		ret = ble_drv_conn_is_active(con_handle, is_active);
+	} break;
+
+	case BLE_EVT_CMD_CONN_IS_ANY_ACTIVE: {
+		BLE_STATE_CHECK;
+
+		bool *is_active = (bool *)msg->param;
+		ret = ble_drv_conn_is_any_active(is_active);
+	} break;
 	case BLE_EVT_CMD_START_SCAN: {
 		BLE_STATE_CHECK;
 
@@ -299,20 +314,6 @@ ble_result_e blemgr_handle_request(blemgr_msg_s *msg)
 
 		trble_data *data = (trble_data *)msg->param;
 		ret = ble_drv_set_adv_resp(data);
-	} break;
-
-	case BLE_EVT_CMD_CONN_IS_ACTIVE: {
-		BLE_STATE_CHECK;
-
-		bool *is_active = (bool *)msg->param;
-		ret = ble_drv_conn_is_active(is_active);
-	} break;
-
-	case BLE_EVT_CMD_CONN_IS_ANY_ACTIVE: {
-		BLE_STATE_CHECK;
-
-		bool *is_active = (bool *)msg->param;
-		ret = ble_drv_conn_is_any_active(is_active);
 	} break;
 
 	case BLE_EVT_CMD_GET_BONDED_DEV: {

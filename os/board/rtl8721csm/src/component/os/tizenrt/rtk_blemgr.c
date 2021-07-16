@@ -36,6 +36,8 @@ trble_result_e trble_netmgr_get_mac_addr(struct bledev *dev, uint8_t mac[TRBLE_B
 trble_result_e trble_netmgr_disconnect(struct bledev *dev, trble_conn_handle con_handle, trble_mode_e mode);
 trble_result_e trble_netmgr_delete_bond(struct bledev *dev, trble_bd_addr *addr, trble_mode_e mode);
 trble_result_e trble_netmgr_delete_bond_all(struct bledev *dev, trble_mode_e mode);
+trble_result_e trble_netmgr_conn_is_active(struct bledev *dev, trble_conn_handle con_handle, bool *is_active);
+trble_result_e trble_netmgr_conn_is_any_active(struct bledev *dev, bool *is_active);
 
 /*** Central(Client) ***/
 trble_result_e trble_netmgr_start_scan(struct bledev *dev, trble_scan_filter *filter);
@@ -59,8 +61,6 @@ trble_result_e trble_netmgr_get_mac_addr_by_conn_handle(struct bledev *dev, trbl
 trble_result_e trble_netmgr_get_conn_handle_by_addr(struct bledev *dev, uint8_t bd_addr[TRBLE_BD_ADDR_MAX_LEN], trble_conn_handle *con_handle);
 trble_result_e trble_netmgr_set_adv_data(struct bledev *dev, trble_data *data);
 trble_result_e trble_netmgr_set_adv_resp(struct bledev *dev, trble_data *data);
-trble_result_e trble_netmgr_conn_is_active(struct bledev *dev, trble_conn_handle con_handle, bool *is_active);
-trble_result_e trble_netmgr_conn_is_any_active(struct bledev *dev, bool *is_active);
 trble_result_e trble_netmgr_get_bonded_device(struct bledev *dev, trble_bonded_device_list_s *device_list, uint16_t *device_count);
 trble_result_e trble_netmgr_start_adv(struct bledev *dev);
 trble_result_e trble_netmgr_start_adv_directed(struct bledev *dev, uint8_t bd_addr[TRBLE_BD_ADDR_MAX_LEN]);
@@ -75,6 +75,8 @@ struct trble_ops g_trble_drv_ops = {
 	trble_netmgr_disconnect,
 	trble_netmgr_delete_bond,
 	trble_netmgr_delete_bond_all,
+	trble_netmgr_conn_is_active,
+	trble_netmgr_conn_is_any_active,
 
 	// Client
 	trble_netmgr_start_scan,
@@ -98,8 +100,6 @@ struct trble_ops g_trble_drv_ops = {
 	trble_netmgr_get_conn_handle_by_addr,
 	trble_netmgr_set_adv_data,
 	trble_netmgr_set_adv_resp,
-	trble_netmgr_conn_is_active,
-	trble_netmgr_conn_is_any_active,
 	trble_netmgr_get_bonded_device,
 	trble_netmgr_start_adv,
 	trble_netmgr_start_adv_directed,
@@ -212,6 +212,18 @@ trble_result_e trble_netmgr_delete_bond_all(struct bledev *dev, trble_mode_e mod
 		ret = rtw_ble_server_delete_bonded_device_all();
 	}
 	return ret;
+}
+
+trble_result_e trble_netmgr_conn_is_active(struct bledev *dev, trble_conn_handle con_handle, bool *is_active)
+{
+	*is_active = rtw_ble_server_conn_is_active(con_handle);
+	return TRBLE_SUCCESS;
+}
+
+trble_result_e trble_netmgr_conn_is_any_active(struct bledev *dev, bool *is_active)
+{
+	*is_active = rtw_ble_server_conn_is_any_active();
+	return TRBLE_SUCCESS;
 }
 
 /*** Central(Client) ***/
@@ -349,18 +361,6 @@ trble_result_e trble_netmgr_set_adv_data(struct bledev *dev, trble_data *data)
 trble_result_e trble_netmgr_set_adv_resp(struct bledev *dev, trble_data *data)
 {
 	return rtw_ble_server_set_adv_name(data->data, data->length);
-}
-
-trble_result_e trble_netmgr_conn_is_active(struct bledev *dev, trble_conn_handle con_handle, bool *is_active)
-{
-	*is_active = rtw_ble_server_conn_is_active(con_handle);
-	return TRBLE_SUCCESS;
-}
-
-trble_result_e trble_netmgr_conn_is_any_active(struct bledev *dev, bool *is_active)
-{
-	*is_active = rtw_ble_server_conn_is_any_active();
-	return TRBLE_SUCCESS;
 }
 
 trble_result_e trble_netmgr_get_bonded_device(struct bledev *dev, trble_bonded_device_list_s *device_list, uint16_t *device_count)

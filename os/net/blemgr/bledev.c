@@ -19,8 +19,7 @@
 #include <tinyara/config.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include <netinet/in.h>
-#include <net/if.h>
+#include <string.h>
 #include <tinyara/lwnl/lwnl.h>
 #include <tinyara/net/if/ble.h>
 #include <tinyara/ble/ble_manager.h>
@@ -122,6 +121,34 @@ int bledev_handle(struct bledev *dev, lwnl_req cmd, void *data, uint32_t data_le
 			return TRBLE_INVALID_ARGS;
 		}
 		TRBLE_DRV_CALL(ret, dev, del_bond_all, (dev, mode));
+	}
+	break;
+	case LWNL_REQ_BLE_CONN_IS_ACTIVE:
+	{
+		bool *is_active = NULL;
+		trble_conn_handle con_handle = 0;
+
+		lwnl_msg_params param = { 0, };
+		if (data != NULL) {
+			memcpy(&param, data, data_len);
+		} else {
+			return TRBLE_INVALID_ARGS;
+		}
+		con_handle = *(trble_conn_handle *)param.param[0];
+		is_active = (bool *)param.param[1];
+
+		TRBLE_DRV_CALL(ret, dev, conn_is_active, (dev, con_handle, is_active));
+	}
+	break;
+	case LWNL_REQ_BLE_CONN_IS_ANY_ACTIVE:
+	{
+		bool *is_active = NULL;
+		if (data != NULL) {
+			is_active = (bool *)data;
+		} else {
+			return TRBLE_INVALID_ARGS;
+		}
+		TRBLE_DRV_CALL(ret, dev, conn_is_any_active, (dev, is_active));
 	}
 	break;
 	
@@ -382,34 +409,6 @@ int bledev_handle(struct bledev *dev, lwnl_req cmd, void *data, uint32_t data_le
 			return TRBLE_INVALID_ARGS;
 		}
 		TRBLE_DRV_CALL(ret, dev, set_adv_resp, (dev, buf));
-	}
-	break;
-	case LWNL_REQ_BLE_CONN_IS_ACTIVE:
-	{
-		bool *is_active = NULL;
-		trble_conn_handle con_handle = 0;
-
-		lwnl_msg_params param = { 0, };
-		if (data != NULL) {
-			memcpy(&param, data, data_len);
-		} else {
-			return TRBLE_INVALID_ARGS;
-		}
-		con_handle = *(trble_conn_handle *)param.param[0];
-		is_active = (uint8_t *)param.param[1];
-
-		TRBLE_DRV_CALL(ret, dev, conn_is_active, (dev, con_handle, is_active));
-	}
-	break;
-	case LWNL_REQ_BLE_CONN_IS_ANY_ACTIVE:
-	{
-		bool *is_active = NULL;
-		if (data != NULL) {
-			is_active = (bool *)data;
-		} else {
-			return TRBLE_INVALID_ARGS;
-		}
-		TRBLE_DRV_CALL(ret, dev, conn_is_any_active, (dev, is_active));
 	}
 	break;
 	case LWNL_REQ_BLE_GET_BONDED_DEV:

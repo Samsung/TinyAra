@@ -250,6 +250,20 @@ int ble_rmc_main(int argc, char *argv[])
 		}
 	}
 
+	if (strncmp(argv[1], "check", 6) == 0) {
+		bool chk = false;
+		ret = ble_manager_conn_is_active(g_conn, &chk);
+		if (ret != BLE_MANAGER_SUCCESS) {
+			RMC_LOG(RMC_TAG, "Fail to get status[%d]\n", ret);
+		} else {
+			if (chk == true) {
+				RMC_LOG(RMC_TAG, "Connected!\n");
+			} else {
+				RMC_LOG(RMC_TAG, "Disonnected!\n");
+			}
+		}
+	}
+
 	if (strncmp(argv[1], "connect", 8) == 0) {
 		struct timespec abstime;
 

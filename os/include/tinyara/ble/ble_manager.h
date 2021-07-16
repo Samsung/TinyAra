@@ -43,6 +43,8 @@ trble_result_e ble_drv_get_mac_addr(uint8_t mac[TRBLE_BD_ADDR_MAX_LEN]);
 trble_result_e ble_drv_disconnect(trble_conn_handle con_handle, trble_mode_e mode);
 trble_result_e ble_drv_delete_bond(trble_bd_addr *addr, trble_mode_e mode);
 trble_result_e ble_drv_delete_bond_all(trble_mode_e mode);
+trble_result_e ble_drv_conn_is_active(trble_conn_handle con_handle, bool *is_active);
+trble_result_e ble_drv_conn_is_any_active(bool *is_active);
 
 /*** Central(Client) ***/
 trble_result_e ble_drv_start_scan(trble_scan_filter *filter);
@@ -66,8 +68,6 @@ trble_result_e ble_drv_get_mac_addr_by_conn_handle(trble_conn_handle con_handle,
 trble_result_e ble_drv_get_conn_handle_by_addr(uint8_t bd_addr[TRBLE_BD_ADDR_MAX_LEN], trble_conn_handle *con_handle);
 trble_result_e ble_drv_set_adv_data(trble_data *data);
 trble_result_e ble_drv_set_adv_resp(trble_data *data);
-trble_result_e ble_drv_conn_is_active(bool *is_active);
-trble_result_e ble_drv_conn_is_any_active(bool *is_active);
 trble_result_e ble_drv_get_bonded_device(trble_bonded_device_list_s *device_list, uint16_t *device_count);
 trble_result_e ble_drv_start_adv(void);
 trble_result_e ble_drv_start_adv_directed(uint8_t bd_addr[TRBLE_BD_ADDR_MAX_LEN]);

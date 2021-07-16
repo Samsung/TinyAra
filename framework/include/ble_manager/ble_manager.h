@@ -29,6 +29,8 @@
  */
 #pragma once
 
+#include <stdbool.h>
+
 #include "ble_common.h"
 #include "ble_client.h"
 #include "ble_server.h"
@@ -39,11 +41,6 @@ typedef enum {
 	BLEMGR_COMBO_MODE,
 	BLEMGR_UNKNOWN_MODE,
 } blemgr_mode_e;
-
-typedef struct _blemgr_context {
-	blemgr_mode_e mode;
-	// conn_id
-} blemgr_context;
 
 /****************************************************************************
  * Name: ble_manager_init
@@ -90,3 +87,7 @@ ble_result_e ble_manager_deinit(void);
  *
  ****************************************************************************/
 ble_result_e ble_manager_get_mac_addr(uint8_t mac[BLE_BD_ADDR_MAX_LEN]);
+
+// Get whether the con_handle is active or not
+ble_result_e ble_manager_conn_is_active(ble_conn_handle con_handle, bool *is_active);
+ble_result_e ble_manager_conn_is_any_active(bool *is_active);

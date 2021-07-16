@@ -49,6 +49,8 @@ typedef enum {
 	LWNL_REQ_BLE_DISCONNECT,
 	LWNL_REQ_BLE_DEL_BOND,
 	LWNL_REQ_BLE_DEL_BOND_ALL,
+	LWNL_REQ_BLE_CONN_IS_ACTIVE,
+	LWNL_REQ_BLE_CONN_IS_ANY_ACTIVE,
 	
 	// Client
 	LWNL_REQ_BLE_START_SCAN,
@@ -72,8 +74,6 @@ typedef enum {
 	LWNL_REQ_BLE_GET_CONN_BY_MAC,
 	LWNL_REQ_BLE_SET_ADV_DATA,
 	LWNL_REQ_BLE_SET_ADV_RESP,
-	LWNL_REQ_BLE_CONN_IS_ACTIVE,
-	LWNL_REQ_BLE_CONN_IS_ANY_ACTIVE,
 	LWNL_REQ_BLE_GET_BONDED_DEV,
 	LWNL_REQ_BLE_START_ADV,
 	LWNL_REQ_BLE_START_ADV_DIRECTED,
@@ -271,6 +271,8 @@ typedef trble_result_e (*trble_get_mac_addr)(struct bledev *dev, uint8_t mac[TRB
 typedef trble_result_e (*trble_disconnect)(struct bledev *dev, trble_conn_handle con_handle, trble_mode_e mode);
 typedef trble_result_e (*trble_delete_bond)(struct bledev *dev, trble_bd_addr *addr, trble_mode_e mode);
 typedef trble_result_e (*trble_delete_bond_all)(struct bledev *dev, trble_mode_e mode);
+typedef trble_result_e (*trble_conn_is_active)(struct bledev *dev, trble_conn_handle con_handle, bool *is_active);
+typedef trble_result_e (*trble_conn_is_any_active)(struct bledev *dev, bool *is_active);
 
 /*** Central(Client) ***/
 typedef trble_result_e (*trble_start_scan)(struct bledev *dev, trble_scan_filter *filter);
@@ -296,8 +298,6 @@ typedef trble_result_e (*trble_get_mac_addr_by_conn_handle)(struct bledev *dev, 
 typedef trble_result_e (*trble_get_conn_handle_by_addr)(struct bledev *dev, uint8_t bd_addr[TRBLE_BD_ADDR_MAX_LEN], trble_conn_handle *con_handle);
 typedef trble_result_e (*trble_set_adv_data)(struct bledev *dev, trble_data *data);
 typedef trble_result_e (*trble_set_adv_resp)(struct bledev *dev, trble_data *data);
-typedef trble_result_e (*trble_conn_is_active)(struct bledev *dev, trble_conn_handle con_handle, bool *is_active);
-typedef trble_result_e (*trble_conn_is_any_active)(struct bledev *dev, bool *is_active);
 typedef trble_result_e (*trble_get_bonded_device)(struct bledev *dev, trble_bonded_device_list_s *device_list, uint16_t *device_count);
 typedef trble_result_e (*trble_start_adv)(struct bledev *dev);
 typedef trble_result_e (*trble_start_adv_directed)(struct bledev *dev, uint8_t bd_addr[TRBLE_BD_ADDR_MAX_LEN]);
@@ -312,6 +312,8 @@ struct trble_ops {
 	trble_disconnect disconnect;
 	trble_delete_bond del_bond;
 	trble_delete_bond_all del_bond_all;
+	trble_conn_is_active conn_is_active;
+	trble_conn_is_any_active conn_is_any_active;
 
 	/* Central(Client) */
 	trble_start_scan start_scan;
@@ -335,8 +337,6 @@ struct trble_ops {
 	trble_get_conn_handle_by_addr get_conn_by_mac;
 	trble_set_adv_data set_adv_data;
 	trble_set_adv_resp set_adv_resp;
-	trble_conn_is_active conn_is_active;
-	trble_conn_is_any_active conn_is_any_active;
 	trble_get_bonded_device get_bonded_dev;
 	trble_start_adv start_adv;
 	trble_start_adv_directed start_adv_dir;

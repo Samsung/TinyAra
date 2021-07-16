@@ -117,6 +117,27 @@ trble_result_e ble_drv_delete_bond_all(trble_mode_e mode)
 	return res;
 }
 
+trble_result_e ble_drv_conn_is_active(trble_conn_handle con_handle, bool *is_active)
+{
+	trble_result_e res = TRBLE_SUCCESS;
+	lwnl_msg_params msg_data = { 2, {(void *)&con_handle, (void *)is_active} };
+	lwnl_msg msg = {BLE_INTF_NAME, {LWNL_REQ_BLE_CONN_IS_ACTIVE}, sizeof(msg_data), (void *)&msg_data, (void *)&res};
+	if (_send_msg(&msg) < 0) {
+		res = TRBLE_FILE_ERROR;
+	}
+	return res;
+}
+
+trble_result_e ble_drv_conn_is_any_active(bool *is_active)
+{
+	trble_result_e res = TRBLE_SUCCESS;
+	lwnl_msg msg = {BLE_INTF_NAME, {LWNL_REQ_BLE_CONN_IS_ANY_ACTIVE}, sizeof(is_active), (void *)is_active, (void *)&res};
+	if (_send_msg(&msg) < 0) {
+		res = TRBLE_FILE_ERROR;
+	}
+	return res;
+}
+
 /*** Central(Client) ***/
 trble_result_e ble_drv_start_scan(trble_scan_filter *filter)
 {
@@ -313,26 +334,6 @@ trble_result_e ble_drv_set_adv_resp(trble_data *data)
 {
 	trble_result_e res = TRBLE_SUCCESS;
 	lwnl_msg msg = {BLE_INTF_NAME, {LWNL_REQ_BLE_SET_ADV_RESP}, sizeof(data), (void *)data, (void *)&res};
-	if (_send_msg(&msg) < 0) {
-		res = TRBLE_FILE_ERROR;
-	}
-	return res;
-}
-
-trble_result_e ble_drv_conn_is_active(bool *is_active)
-{
-	trble_result_e res = TRBLE_SUCCESS;
-	lwnl_msg msg = {BLE_INTF_NAME, {LWNL_REQ_BLE_CONN_IS_ACTIVE}, sizeof(is_active), (void *)is_active, (void *)&res};
-	if (_send_msg(&msg) < 0) {
-		res = TRBLE_FILE_ERROR;
-	}
-	return res;
-}
-
-trble_result_e ble_drv_conn_is_any_active(bool *is_active)
-{
-	trble_result_e res = TRBLE_SUCCESS;
-	lwnl_msg msg = {BLE_INTF_NAME, {LWNL_REQ_BLE_CONN_IS_ANY_ACTIVE}, sizeof(is_active), (void *)is_active, (void *)&res};
 	if (_send_msg(&msg) < 0) {
 		res = TRBLE_FILE_ERROR;
 	}
