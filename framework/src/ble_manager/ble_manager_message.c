@@ -24,6 +24,7 @@
 #include <fcntl.h>
 #include <sys/select.h>
 #include <sys/socket.h>
+#include <sys/types.h>
 #include <tinyara/lwnl/lwnl.h>
 #include "ble_manager_log.h"
 #include "ble_manager_event.h"
@@ -169,8 +170,8 @@ int blemgr_create_msgqueue(ble_handler_queue *queue)
 		BLE_MESSAGE_ERROR;
 		return -1;
 	}
-
-	res = bind(queue->nd, NULL, 0);
+	struct sockaddr_lwnl addr = {LWNL_DEV_BLE};
+	res = bind(queue->nd, (const struct sockaddr *)&addr, sizeof(struct sockaddr_lwnl));
 	if (res < 0) {
 		close(queue->fd);
 		close(queue->nd);

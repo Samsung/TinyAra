@@ -100,6 +100,9 @@ static inline void LWNL_SET_MSG(wifimgr_msg_s *msg, wifimgr_evt_e event,
 
 static int _lwnl_call_event(int fd, lwnl_cb_status status, int len)
 {
+	if (status.evt != LWNL_EVT_SCAN_DONE && len != 0) {
+		assert(0);
+	}
 	switch (status.evt) {
 	case LWNL_EVT_STA_CONNECTED:
 		LWNL_SET_MSG(&g_msg, WIFIMGR_EVT_STA_CONNECTED, WIFI_MANAGER_FAIL, NULL, NULL);

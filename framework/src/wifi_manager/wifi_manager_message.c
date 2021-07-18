@@ -22,6 +22,7 @@
 #include <debug.h>
 #include <errno.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <net/if.h>
 #include <tinyara/lwnl/lwnl.h>
 #include <wifi_manager/wifi_manager.h>
@@ -168,7 +169,8 @@ int wifimgr_create_msgqueue(handler_queue *queue)
 		return -1;
 	}
 
-	res = bind(queue->nd, NULL, 0);
+	struct sockaddr_lwnl addr = {LWNL_DEV_WIFI};
+	res = bind(queue->nd, (const struct sockaddr *)&addr, sizeof(struct sockaddr_lwnl));
 	if (res < 0) {
 		close(queue->fd);
 		close(queue->nd);

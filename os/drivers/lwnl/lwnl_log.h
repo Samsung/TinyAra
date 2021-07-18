@@ -17,8 +17,12 @@
  ****************************************************************************/
 #pragma once
 
-#define LWNL_LOGI(tag, fmt, args...) nlvdbg(tag"[T%d]"fmt"\n", getpid(), ##args)
-#define LWNL_LOGE(tag, fmt, args...) nldbg(tag"[ERR][T%d]"fmt"\n", getpid(), ##args)
+//#define LWNL_LOGI(tag, fmt, args...) nlvdbg("%d\t"tag"[T%d]"fmt"\n", __LINE__, getpid(), ##args)
+//#define LWNL_LOGE(tag, fmt, args...) nldbg("%d\t"tag"[ERR][T%d]"fmt"\n", __LINE__, getpid(), ##args)
+//#define LWNL_LOGI(tag, fmt, args...) lldbg("%d\t"tag"[T%d]"fmt"\n", __LINE__, getpid(), ##args)
+//#define LWNL_LOGE(tag, fmt, args...) lldbg("%d\t"tag"[ERR][T%d]"fmt"\n", __LINE__, getpid(), ##args)
+#define LWNL_LOGI(tag, fmt, args...)
+#define LWNL_LOGE(tag, fmt, args...)
 #define LWNL_ENTER(tag)							\
 	do {										\
 		LWNL_LOGI(tag, "-->");					\

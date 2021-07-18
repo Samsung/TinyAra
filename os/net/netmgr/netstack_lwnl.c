@@ -49,10 +49,8 @@ static int netlink_socket(int domain, int type, int protocol)
 // allocate network event listen
 static int netlink_bind(int s, const struct sockaddr *name, socklen_t namelen)
 {
-	(void)name;
 	(void)namelen;
-	int res = ioctl(s, SIOCSLWNLEVT, 0);
-	return res;
+	return ioctl(s, SIOCSLWNLEVT, name);
 }
 
 struct netstack_ops g_netlink_stack_ops = {
